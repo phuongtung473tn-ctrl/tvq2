@@ -722,15 +722,23 @@ function Landing() {
               }}
               className="group rounded-2xl border border-border bg-card p-5 transition hover:border-primary/50"
             >
-              <summary className="cursor-pointer list-none text-base font-bold leading-snug marker:hidden">
+              <summary className="cursor-pointer break-words text-base font-bold leading-snug marker:hidden">
                 <span className="mr-2 text-primary">?</span>
                 {f.q}
               </summary>
-              <p className="mt-3 text-sm leading-relaxed text-muted-foreground">
+              <p className="mt-3 whitespace-pre-line break-words text-sm leading-relaxed text-muted-foreground">
                 {f.a}
               </p>
             </details>
           ))}
+        </div>
+        <div className="mt-8 text-center">
+          <a
+            href="#dang-ky-cuoi"
+            className="inline-flex w-full max-w-md items-center justify-center rounded-xl bg-primary px-6 py-3 text-center text-sm font-extrabold text-primary-foreground sm:w-auto"
+          >
+            Nhận tư vấn điều kiện và lộ trình phù hợp
+          </a>
         </div>
       </section>
 

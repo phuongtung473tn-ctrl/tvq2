@@ -2543,6 +2543,42 @@ function LandingEditorModal({ onClose }: ModalProps) {
       ];
       draft.landing.heroCtaLabel = "Nhận lộ trình phù hợp";
     });
+  const applyStudyInChinaFaqs = () =>
+    update((draft) => {
+      draft.landing.faqHeading = "Câu hỏi thường gặp";
+      draft.landing.faqs = [
+        {
+          slug: "thoi_gian_hoc",
+          question: "Chương trình học bao nhiêu năm?",
+          answer:
+            "Chương trình học 03 năm hệ Cao đẳng chính quy. Sau khi tốt nghiệp, sinh viên có thể liên thông lên Đại học nếu có nhu cầu.\n\nNăm đầu tiên chủ yếu học tiếng Trung, văn hóa, lịch sử và các kiến thức hội nhập; đồng thời làm quen với môi trường học tập, sinh hoạt tại Trung Quốc.",
+        },
+        {
+          slug: "luong_thuc_hanh",
+          question: "Lương thực hành có đủ để trang trải chi phí không?",
+          answer:
+            "Có. Mỗi năm, sinh viên có khoảng 08 tháng thực hành hưởng lương và chỉ học lý thuyết tại trường khoảng 04 tháng.\n\nMức thu nhập thực hành thường đủ để trang trải chi phí sinh hoạt trong suốt quá trình học. Nếu chi tiêu hợp lý, nhiều bạn còn có thể tích lũy một khoản vốn trước khi tốt nghiệp.",
+        },
+        {
+          slug: "bang_tot_nghiep",
+          question: "Sau khi tốt nghiệp sẽ nhận bằng gì?",
+          answer:
+            "Sinh viên được cấp bằng Cao đẳng chính quy do trường tại Trung Quốc cấp, có thể liên thông lên Đại học và được công nhận tại hơn 30 quốc gia theo quy định, thỏa thuận công nhận văn bằng của từng nước.",
+        },
+        {
+          slug: "ky_nhap_hoc",
+          question: "Mỗi năm có bao nhiêu kỳ nhập học?",
+          answer:
+            "Thông thường chương trình có 02 kỳ nhập học:\n\n• Kỳ tháng 3\n• Kỳ tháng 9",
+        },
+        {
+          slug: "dieu_kien_tuyen_sinh",
+          question: "Chương trình nhận độ tuổi và trình độ như thế nào?",
+          answer:
+            "Học viện Kỹ sư Quế Lâm\n• Độ tuổi: Dưới 35 tuổi\n• Trình độ: Tốt nghiệp THCS trở lên\n\nĐại học Khoa học Kỹ thuật Điện tử Quế Lâm (GUET)\n• Độ tuổi: Dưới 30 tuổi\n• Trình độ: Tốt nghiệp THPT trở lên\n\nĐại học Nghề nghiệp Nam Thông (tỉnh Giang Tô)\n• Độ tuổi: Dưới 25 tuổi\n• Trình độ: Tốt nghiệp THPT trở lên",
+        },
+      ];
+    });
   const updateJson = <
     K extends
       | "stats"
@@ -3468,6 +3504,20 @@ function LandingEditorModal({ onClose }: ModalProps) {
         />
       </Field>
       <Field label="Nhãn CTA hero">
+        <div className="mb-3 rounded-lg border border-neutral-200 p-3 dark:border-white/10">
+          <p className="text-xs font-bold">FAQ chương trình</p>
+          <p className="mt-1 text-[11px] text-neutral-500">
+            Áp dụng bộ câu hỏi về thời gian học, lương thực hành, bằng cấp và
+            điều kiện tuyển sinh.
+          </p>
+          <button
+            type="button"
+            onClick={applyStudyInChinaFaqs}
+            className="mt-2 rounded-lg bg-primary px-3 py-2 text-xs font-bold text-primary-foreground"
+          >
+            Áp dụng FAQ chương trình
+          </button>
+        </div>
         <TextInput
           value={content.heroCtaLabel}
           onChange={(e) =>
@@ -3595,6 +3645,13 @@ function LandingEditorModal({ onClose }: ModalProps) {
         />
       </Field>
       <Field label="FAQ (JSON array gồm slug, question, answer)">
+        <button
+          type="button"
+          onClick={applyStudyInChinaFaqs}
+          className="mb-2 rounded-lg bg-primary px-3 py-2 text-xs font-bold text-primary-foreground"
+        >
+          Áp dụng FAQ chương trình
+        </button>
         <TextArea
           value={JSON.stringify(content.faqs, null, 2)}
           onChange={(e) => updateJson("faqs", e.target.value)}

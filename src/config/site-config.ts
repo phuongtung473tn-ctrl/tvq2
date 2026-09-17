@@ -574,40 +574,34 @@ export const DEFAULT_CONFIG: SiteConfig = {
     faqHeading: "Câu hỏi thường gặp",
     faqs: [
       {
-        slug: "hoc_phi",
-        question: "Du học nghề Trung Quốc học phí 0Đ có thật không?",
+        slug: "thoi_gian_hoc",
+        question: "Chương trình học bao nhiêu năm?",
         answer:
-          "Có. Học phí được doanh nghiệp Trung Quốc tài trợ theo chương trình liên kết đào tạo nhân lực. Học viên chỉ cần chuẩn bị chi phí hồ sơ, vé máy bay và sinh hoạt ban đầu; phần này được tư vấn minh bạch trước khi đăng ký.",
+          "Chương trình học 03 năm hệ Cao đẳng chính quy. Sau khi tốt nghiệp, sinh viên có thể liên thông lên Đại học nếu có nhu cầu.\n\nNăm đầu tiên chủ yếu học tiếng Trung, văn hóa, lịch sử và các kiến thức hội nhập; đồng thời làm quen với môi trường học tập, sinh hoạt tại Trung Quốc.",
       },
       {
-        slug: "tieng_trung",
-        question: "Điều kiện tham gia gồm những gì?",
+        slug: "luong_thuc_hanh",
+        question: "Lương thực hành có đủ để trang trải chi phí không?",
         answer:
-          "Tốt nghiệp THPT (hoặc tương đương), độ tuổi 18-28, sức khỏe tốt. Không cần chứng minh tài chính và không yêu cầu biết tiếng Hán trước — học viên được đào tạo tiếng Hán nền tảng trước khi bay.",
+          "Có. Mỗi năm, sinh viên có khoảng 08 tháng thực hành hưởng lương và chỉ học lý thuyết tại trường khoảng 04 tháng.\n\nMức thu nhập thực hành thường đủ để trang trải chi phí sinh hoạt trong suốt quá trình học. Nếu chi tiêu hợp lý, nhiều bạn còn có thể tích lũy một khoản vốn trước khi tốt nghiệp.",
       },
       {
-        slug: "luong_thuc_tap",
-        question: "Vừa học vừa làm thì lương bao nhiêu và có đủ sống không?",
+        slug: "bang_tot_nghiep",
+        question: "Sau khi tốt nghiệp sẽ nhận bằng gì?",
         answer:
-          "Thu nhập thực tập tại doanh nghiệp đối tác thường 15-30 triệu đồng/tháng tùy ngành và ca làm. Mức này đủ trang trải sinh hoạt, ký túc xá và còn dư gửi về gia đình.",
+          "Sinh viên được cấp bằng Cao đẳng chính quy do trường tại Trung Quốc cấp, có thể liên thông lên Đại học và được công nhận tại hơn 30 quốc gia theo quy định, thỏa thuận công nhận văn bằng của từng nước.",
       },
       {
-        slug: "bang_cap",
-        question: "Bằng tốt nghiệp có được công nhận không?",
+        slug: "ky_nhap_hoc",
+        question: "Mỗi năm có bao nhiêu kỳ nhập học?",
         answer:
-          "Học viên nhận bằng Cao đẳng chính quy của trường tại Trung Quốc, được công nhận quốc tế, có thể ở lại làm việc, học liên thông lên Đại học hoặc về Việt Nam làm cho doanh nghiệp FDI.",
+          "Thông thường chương trình có 02 kỳ nhập học:\n\n• Kỳ tháng 3\n• Kỳ tháng 9",
       },
       {
-        slug: "thoi_gian",
-        question: "Thời gian nhập học và quy trình mất bao lâu?",
+        slug: "dieu_kien_tuyen_sinh",
+        question: "Chương trình nhận độ tuổi và trình độ như thế nào?",
         answer:
-          "Có hai kỳ nhập học mỗi năm: tháng 3 và tháng 9. Từ lúc đăng ký tới khi bay thường 3-5 tháng, gồm xét hồ sơ, học tiếng Hán và làm thủ tục visa.",
-      },
-      {
-        slug: "nganh_hoc",
-        question: "Ngành nào đang cần nhiều nhân lực nhất?",
-        answer:
-          "Công nghệ ô tô điện, công nghệ drone (UAV), IoT và logistics là các ngành tuyển nhiều nhất, đồng thời có mức lương thực tập cao nhất trong 8 ngành của chương trình.",
+          "Học viện Kỹ sư Quế Lâm\n• Độ tuổi: Dưới 35 tuổi\n• Trình độ: Tốt nghiệp THCS trở lên\n\nĐại học Khoa học Kỹ thuật Điện tử Quế Lâm (GUET)\n• Độ tuổi: Dưới 30 tuổi\n• Trình độ: Tốt nghiệp THPT trở lên\n\nĐại học Nghề nghiệp Nam Thông (tỉnh Giang Tô)\n• Độ tuổi: Dưới 25 tuổi\n• Trình độ: Tốt nghiệp THPT trở lên",
       },
     ],
     finalCtaHeading: "Đổi 30 giây hôm nay cho 5 năm tới của bạn",
