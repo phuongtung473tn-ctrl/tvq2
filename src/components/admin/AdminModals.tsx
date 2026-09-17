@@ -1343,17 +1343,17 @@ function AnalyticsModal({ onClose }: ModalProps) {
   const { config, ready: configReady } = useSiteConfig();
   const [a, setA] = useState<AnalyticsState | null>(null);
   const [actionMessage, setActionMessage] = useState<string | null>(null);
-  const [loadError, setLoadError] = useState(false);
+  const [loadError, setLoadError] = useState<string | null>(null);
   const [loadingCloud, setLoadingCloud] = useState(false);
   const reloadCloudAnalytics = useCallback(async () => {
     if (!configReady) return;
     setLoadingCloud(true);
-    const cloud = await loadCloudAnalytics(config);
-    if (cloud) {
-      setA(cloud);
-      setLoadError(false);
+    const result = await loadCloudAnalytics(config);
+    if (result.data) {
+      setA(result.data);
+      setLoadError(null);
     } else if (config.admin.storageMode === "database") {
-      setLoadError(true);
+      setLoadError(result.error || "unknown_error");
     }
     setLoadingCloud(false);
   }, [config, configReady]);
@@ -1412,10 +1412,18 @@ function AnalyticsModal({ onClose }: ModalProps) {
       </div>
       {loadError && (
         <p className="mb-3 rounded-lg bg-amber-50 px-3 py-2 text-xs text-amber-800">
-          Chưa đọc được Analytics cloud. Hãy chạy migration
-          <code className="mx-1 font-bold">supabase/visitor_tracking.sql</code>
-          để tạo RPC <code className="font-bold">get_funnel_analytics</code>,
-          rồi tải lại trang.
+          Chưa đọc được Analytics cloud ({loadError}).
+          {loadError === "admin_session_missing" ? (
+            <>Hãy đăng xuất, đăng nhập lại Admin rồi tải lại.</>
+          ) : (
+            <>
+              Kiểm tra migration
+              <code className="mx-1 font-bold">
+                supabase/visitor_tracking.sql
+              </code>
+              và tải lại.
+            </>
+          )}
         </p>
       )}
       {config.admin.storageMode === "database" && (

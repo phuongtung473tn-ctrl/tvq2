@@ -820,6 +820,11 @@ export interface AnalyticsState {
   byVariant: Record<string, { visits: number; leads: number }>;
 }
 
+export interface CloudAnalyticsResult {
+  data: AnalyticsState | null;
+  error?: string;
+}
+
 let cloudAnalyticsState: AnalyticsState | null = null;
 
 function emptyAnalytics(): AnalyticsState {
@@ -942,7 +947,7 @@ async function syncAnalyticsToSupabase(
 
 export async function loadCloudAnalytics(
   config: SiteConfig,
-): Promise<AnalyticsState | null> {
+): Promise<CloudAnalyticsResult> {
   const env = import.meta.env as Record<string, string | undefined>;
   const supabaseUrl =
     config.admin.supabaseUrl.trim() || env["VITE_SUPABASE_URL"]?.trim() || "";
@@ -957,7 +962,7 @@ export async function loadCloudAnalytics(
     !supabaseAnonKey
   ) {
     console.warn("Analytics cloud skipped: Supabase config is not ready");
-    return null;
+    return { data: null, error: "supabase_config_missing" };
   }
   try {
     let accessToken = getSupabaseAccessToken();
@@ -967,7 +972,7 @@ export async function loadCloudAnalytics(
     }
     if (!accessToken) {
       console.warn("Analytics cloud skipped: Admin access token is missing");
-      return null;
+      return { data: null, error: "admin_session_missing" };
     }
     const base = supabaseUrl.replace(/\/$/, "");
     const headers = {
@@ -980,23 +985,22 @@ export async function loadCloudAnalytics(
       body: "{}",
     });
     if (!response.ok) {
-      console.warn(
-        `Analytics cloud RPC failed [${response.status}]`,
-        await response.text(),
-      );
-      return null;
+      const detail = await response.text();
+      console.warn(`Analytics cloud RPC failed [${response.status}]`, detail);
+      return { data: null, error: `rpc_${response.status}` };
     }
     const rows = (await response.json()) as Array<{ data?: unknown }>;
     if (!isRecord(rows[0]?.data)) {
       console.warn("Analytics cloud RPC returned an invalid payload");
-      return null;
+      return { data: null, error: "invalid_rpc_payload" };
     }
     cloudAnalyticsState = normalizeAnalytics(
       rows[0].data as Partial<AnalyticsState>,
     );
-    return structuredClone(cloudAnalyticsState);
-  } catch {
-    return null;
+    return { data: structuredClone(cloudAnalyticsState) };
+  } catch (error) {
+    console.warn("Analytics cloud request failed", error);
+    return { data: null, error: "network_error" };
   }
 }
 
