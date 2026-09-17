@@ -250,6 +250,9 @@ function Landing() {
   const customSections = content.sectionsArray.filter(
     (item) => item.type === "custom" && item.enabled,
   );
+  const offerSection = content.sectionsArray.find(
+    (item) => item.type === "offer" && item.enabled,
+  );
   const links = contactLinks(config);
   const menuPages = config.pages
     .filter((page) => page.enabled && page.showInMenu)
@@ -471,6 +474,8 @@ function Landing() {
           </div>
         </div>
       </section>
+
+      {offerSection && <ContentSection section={offerSection} />}
 
       {config.trafficStats.enabled &&
         config.trafficStats.position === "afterHero" && (

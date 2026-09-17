@@ -2579,6 +2579,32 @@ function LandingEditorModal({ onClose }: ModalProps) {
         },
       ];
     });
+  const applySeptemberOffer = () =>
+    update((draft) => {
+      const offer = {
+        id: "september-2026-offer",
+        type: "offer",
+        label: "Ưu đãi tháng 9/2026",
+        enabled: true,
+        order: 1,
+        content: {
+          heading: "🎉 Ưu đãi đặc biệt - Tháng 9/2026 🎉",
+          body: "Đăng ký tham gia chương trình trước ngày 28/09/2026 để nhận ngay:\n\n🎁 ƯU ĐÃI TRỊ GIÁ 2.000.000 ĐỒNG\n\n⏰ Số lượng ưu đãi có hạn. Áp dụng cho hồ sơ đăng ký và hoàn tất thủ tục theo quy định trước ngày 28/09/2026.\n\n👉 Đừng bỏ lỡ cơ hội trở thành du học sinh nghề Trung Quốc với nhiều chính sách hỗ trợ hấp dẫn!",
+          imageUrl: "",
+          variant: "offer",
+          buttonLabel: "Đăng ký nhận ưu đãi 2.000.000đ",
+          buttonHref: "#dang-ky",
+          backgroundColor: "",
+          textColor: "",
+          accentColor: "",
+        },
+      };
+      const index = draft.landing.sectionsArray.findIndex(
+        (section) => section.id === offer.id,
+      );
+      if (index === -1) draft.landing.sectionsArray.push(offer);
+      else draft.landing.sectionsArray[index] = offer;
+    });
   const updateJson = <
     K extends
       | "stats"
@@ -3364,6 +3390,13 @@ function LandingEditorModal({ onClose }: ModalProps) {
         </Field>
       </div>
       <Field label="Hero: nhãn trên đầu">
+        <button
+          type="button"
+          onClick={applySeptemberOffer}
+          className="mb-2 rounded-lg border border-gold/50 bg-gold px-3 py-2 text-xs font-bold text-gold-foreground"
+        >
+          Áp dụng ưu đãi tháng 9/2026
+        </button>
         <button
           type="button"
           onClick={applyStudyInChinaHero}

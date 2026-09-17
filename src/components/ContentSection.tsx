@@ -21,9 +21,13 @@ export function ContentSection({ section }: { section: ContentSectionData }) {
         backgroundColor: section.content?.backgroundColor || undefined,
         color: section.content?.textColor || undefined,
       }}
-      className={`mx-auto w-full max-w-6xl px-4 py-16 sm:py-20 ${
+      className={`mx-auto w-full max-w-6xl px-4 py-10 sm:py-14 ${
         variant === "testimonials" ? "border-l-4 border-gold bg-card" : ""
-      } ${variant === "guarantee" ? "ring-1 ring-primary/20" : ""}`}
+      } ${variant === "guarantee" ? "ring-1 ring-primary/20" : ""} ${
+        variant === "offer"
+          ? "my-6 rounded-xl border border-gold/50 bg-primary text-primary-foreground shadow-[var(--shadow-card)]"
+          : ""
+      }`}
     >
       {variant === "video" && youtubeId ? (
         <div className="mb-6 aspect-video overflow-hidden rounded-2xl bg-neutral-900">
@@ -48,7 +52,9 @@ export function ContentSection({ section }: { section: ContentSectionData }) {
       )}
       <h2
         style={{ color: section.content?.accentColor || undefined }}
-        className="text-2xl font-extrabold sm:text-3xl"
+        className={`text-2xl font-extrabold sm:text-3xl ${
+          variant === "offer" ? "text-primary-foreground" : ""
+        }`}
       >
         {section.content?.heading || section.label}
       </h2>
@@ -61,13 +67,17 @@ export function ContentSection({ section }: { section: ContentSectionData }) {
             {section.content.body}
           </p>
         </details>
-      ) : variant === "pricing" || variant === "grid" ? (
+      ) : variant === "pricing" || variant === "grid" || variant === "offer" ? (
         <ul className="mt-4 grid gap-2 sm:grid-cols-2">
           {(bodyLines.length ? bodyLines : [section.content?.body || ""]).map(
             (line) => (
               <li
                 key={line}
-                className="rounded-xl border border-border bg-card p-3 text-sm leading-relaxed"
+                className={`rounded-lg border p-3 text-sm leading-relaxed ${
+                  variant === "offer"
+                    ? "border-white/20 bg-white/10 text-primary-foreground"
+                    : "border-border bg-card"
+                }`}
               >
                 ✓ {line}
               </li>
@@ -76,7 +86,11 @@ export function ContentSection({ section }: { section: ContentSectionData }) {
         </ul>
       ) : (
         section.content?.body && (
-          <p className="mt-3 max-w-3xl whitespace-pre-line text-muted-foreground">
+          <p
+            className={`mt-3 max-w-3xl whitespace-pre-line text-muted-foreground ${
+              variant === "offer" ? "text-primary-foreground/90" : ""
+            }`}
+          >
             {section.content.body}
           </p>
         )
@@ -89,7 +103,11 @@ export function ContentSection({ section }: { section: ContentSectionData }) {
       {section.content?.buttonLabel && (
         <a
           href={section.content.buttonHref || "#dang-ky"}
-          className="mt-6 inline-flex rounded-xl bg-primary px-5 py-3 font-bold text-primary-foreground"
+          className={`mt-6 inline-flex max-w-full rounded-xl px-5 py-3 text-center font-bold ${
+            variant === "offer"
+              ? "bg-gold text-gold-foreground"
+              : "bg-primary text-primary-foreground"
+          }`}
         >
           {section.content.buttonLabel}
         </a>
