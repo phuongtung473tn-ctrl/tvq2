@@ -21,6 +21,7 @@ const SUBMISSION_KEY = "lp_submission_counters_v2";
 const SESSION_MARKER_KEY = "lp_session_marker_v2";
 const VISITOR_SESSION_TABLE = "visitor_sessions";
 const NETWORK_TIMEOUT_MS = 3500;
+const SESSION_TIMEOUT_MS = 30 * 60 * 1000;
 const runtimeStorage = new Map<string, unknown>();
 
 export interface VisitorTrackingInitOptions {
@@ -168,18 +169,28 @@ function writeJSON(key: string, value: unknown) {
 function readSessionMarker() {
   if (!isBrowser()) return "";
   try {
-    return window.localStorage.getItem(SESSION_MARKER_KEY) || "";
+    const raw = window.sessionStorage.getItem(SESSION_MARKER_KEY) || "";
+    const [sessionId, timestamp] = raw.split("|");
+    if (
+      sessionId &&
+      Number.isFinite(Number(timestamp)) &&
+      Date.now() - Number(timestamp) < SESSION_TIMEOUT_MS
+    ) {
+      return sessionId;
+    }
+    window.sessionStorage.removeItem(SESSION_MARKER_KEY);
   } catch {
     return String(runtimeStorage.get(SESSION_MARKER_KEY) || "");
   }
+  return "";
 }
 
 function writeSessionMarker(value: string) {
   if (!isBrowser()) return;
   try {
-    window.localStorage.setItem(SESSION_MARKER_KEY, value);
+    window.sessionStorage.setItem(SESSION_MARKER_KEY, `${value}|${Date.now()}`);
   } catch {
-    /* Private/in-app browsers may block localStorage. */
+    /* Private/in-app browsers may block sessionStorage. */
   }
   runtimeStorage.set(SESSION_MARKER_KEY, value);
 }
@@ -674,7 +685,10 @@ async function fetchRemoteSessionCounts(
 export function syncCurrentVisitorSession(
   options: VisitorTrackingInitOptions,
 ): void {
-  if (!runtime.initialized) return;
+  if (!runtime.initialized) {
+    initVisitorTracking(options);
+    return;
+  }
   void fetchRemoteSessionCounts(
     options,
     runtime.visitorId,
