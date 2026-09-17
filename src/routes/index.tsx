@@ -475,8 +475,6 @@ function Landing() {
         </div>
       </section>
 
-      {offerSection && <ContentSection section={offerSection} />}
-
       {config.trafficStats.enabled &&
         config.trafficStats.position === "afterHero" && (
           <section className="border-b border-border/40 bg-muted/20 py-3">
@@ -771,6 +769,8 @@ function Landing() {
           <ContentSection section={item} />
         </div>
       ))}
+
+      {offerSection && <ContentSection section={offerSection} />}
 
       {/* Footer */}
       <footer

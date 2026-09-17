@@ -25,7 +25,7 @@ export function ContentSection({ section }: { section: ContentSectionData }) {
         variant === "testimonials" ? "border-l-4 border-gold bg-card" : ""
       } ${variant === "guarantee" ? "ring-1 ring-primary/20" : ""} ${
         variant === "offer"
-          ? "my-6 rounded-xl border border-gold/50 bg-primary text-primary-foreground shadow-[var(--shadow-card)]"
+          ? "mb-6 rounded-xl border border-gold/50 bg-primary text-primary-foreground shadow-[var(--shadow-card)]"
           : ""
       }`}
     >
@@ -67,7 +67,11 @@ export function ContentSection({ section }: { section: ContentSectionData }) {
             {section.content.body}
           </p>
         </details>
-      ) : variant === "pricing" || variant === "grid" || variant === "offer" ? (
+      ) : variant === "offer" ? (
+        <div className="mt-4 max-w-3xl whitespace-pre-line text-sm leading-relaxed text-primary-foreground/90 sm:text-base">
+          {section.content?.body}
+        </div>
+      ) : variant === "pricing" || variant === "grid" ? (
         <ul className="mt-4 grid gap-2 sm:grid-cols-2">
           {(bodyLines.length ? bodyLines : [section.content?.body || ""]).map(
             (line) => (
