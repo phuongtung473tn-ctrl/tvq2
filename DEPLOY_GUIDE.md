@@ -202,6 +202,10 @@ Nếu `visitor_sessions` vẫn bằng 0 sau khi mở landing, chạy lại
 `supabase/visitor_tracking.sql` để áp dụng quyền `insert` cho `anon`, sau đó
 redeploy frontend và mở lại trang landing. Không cấp quyền `select` cho `anon`.
 
+Migration mới cũng tạo RPC `record_visitor_session`. RPC này là bắt buộc để
+Footer nhận được tổng số lượt hôm nay/tháng mà vẫn giữ RLS an toàn; nếu request
+`/rest/v1/rpc/record_visitor_session` trả `404`, schema cloud chưa được cập nhật.
+
 ---
 
 ## D. Cloud Cron-job (sao lưu định kỳ)

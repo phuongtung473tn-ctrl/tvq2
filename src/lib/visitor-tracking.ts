@@ -605,73 +605,43 @@ async function fetchRemoteSessionCounts(
   const timer = window.setTimeout(() => controller.abort(), NETWORK_TIMEOUT_MS);
 
   try {
-    if (isNewSession) {
-      const sessionResponse = await fetch(
-        `${base}/rest/v1/${VISITOR_SESSION_TABLE}`,
-        {
-          method: "POST",
-          headers: {
-            ...headers,
-            Prefer: "resolution=ignore-duplicates,return=minimal",
-          },
-          signal: controller.signal,
-          body: JSON.stringify([
-            {
-              id: sessionId,
-              visitor_id: visitorId,
-              visited_day: dayKey(),
-              visited_month: monthKey(),
-              source: attribution.source || null,
-              medium: attribution.medium || null,
-              campaign: attribution.campaign || null,
-              content: attribution.content || null,
-              device_model: device.model,
-              device_kind: device.kind,
-              os: device.os,
-              browser: device.browser,
-              created_at: new Date().toISOString(),
-            },
-          ]),
-        },
-      );
-      if (!sessionResponse.ok && sessionResponse.status !== 409) {
-        console.warn(
-          `visitor_sessions insert failed [${sessionResponse.status}]`,
-        );
-        return;
-      }
-    }
-
-    const [todayResponse, monthResponse] = await Promise.all([
-      fetch(
-        `${base}/rest/v1/${VISITOR_SESSION_TABLE}?visitor_id=eq.${encodeURIComponent(visitorId)}&visited_day=eq.${dayKey()}&select=id`,
-        { headers, signal: controller.signal },
-      ),
-      fetch(
-        `${base}/rest/v1/${VISITOR_SESSION_TABLE}?visitor_id=eq.${encodeURIComponent(visitorId)}&visited_month=eq.${monthKey()}&select=id`,
-        { headers, signal: controller.signal },
-      ),
-    ]);
-
-    if (!todayResponse.ok || !monthResponse.ok) {
-      console.warn(
-        `visitor_sessions count failed [${todayResponse.status}/${monthResponse.status}]`,
-      );
+    const response = await fetch(`${base}/rest/v1/rpc/record_visitor_session`, {
+      method: "POST",
+      headers,
+      signal: controller.signal,
+      body: JSON.stringify({
+        p_id: sessionId,
+        p_visitor_id: visitorId,
+        p_source: attribution.source || null,
+        p_medium: attribution.medium || null,
+        p_campaign: attribution.campaign || null,
+        p_content: attribution.content || null,
+        p_device_model: device.model,
+        p_device_kind: device.kind,
+        p_os: device.os,
+        p_browser: device.browser,
+      }),
+    });
+    if (!response.ok) {
+      console.warn(`record_visitor_session failed [${response.status}]`);
       return;
     }
-    const [todayRows, monthRows] = (await Promise.all([
-      todayResponse.json(),
-      monthResponse.json(),
-    ])) as [{ id: string }[], { id: string }[]];
+    const rows = (await response.json()) as Array<{
+      today_count?: number;
+      month_count?: number;
+    }>;
+    const counts = rows[0];
 
     runtime.sessionCounts = {
       currentSession: runtime.sessionCounts.currentSession,
-      today: Array.isArray(todayRows)
-        ? todayRows.length
-        : runtime.sessionCounts.today,
-      month: Array.isArray(monthRows)
-        ? monthRows.length
-        : runtime.sessionCounts.month,
+      today:
+        typeof counts?.today_count === "number"
+          ? counts.today_count
+          : runtime.sessionCounts.today,
+      month:
+        typeof counts?.month_count === "number"
+          ? counts.month_count
+          : runtime.sessionCounts.month,
     };
     updateSnapshot();
   } catch {
