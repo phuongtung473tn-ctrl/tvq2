@@ -15,6 +15,8 @@ create table if not exists public.visitor_sessions (
 );
 
 alter table public.visitor_sessions enable row level security;
+grant insert on public.visitor_sessions to anon, authenticated;
+grant select on public.visitor_sessions to authenticated;
 drop policy if exists "visitor sessions can be created by public form" on public.visitor_sessions;
 create policy "visitor sessions can be created by public form"
 	on public.visitor_sessions for insert

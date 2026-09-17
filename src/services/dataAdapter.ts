@@ -361,6 +361,8 @@ create policy "leads can be created by public form" on public.leads for insert w
 
 create table if not exists public.visitor_sessions (id text primary key, visitor_id text not null, visited_day date not null, visited_month text not null, source text, medium text, campaign text, content text, device_model text, device_kind text, os text, browser text, created_at timestamptz not null default now());
 alter table public.visitor_sessions enable row level security;
+grant insert on public.visitor_sessions to anon, authenticated;
+grant select on public.visitor_sessions to authenticated;
 drop policy if exists "visitor sessions can be created by public form" on public.visitor_sessions;
 create policy "visitor sessions can be created by public form" on public.visitor_sessions for insert with check (true);
 drop policy if exists "visitor sessions can be counted by public form" on public.visitor_sessions;
@@ -909,6 +911,9 @@ async function syncAnalyticsToSupabase(
   state: AnalyticsState,
   config: SiteConfig,
 ): Promise<boolean> {
+  // Visitor không được ghi bảng tổng hợp bằng anon. Analytics cloud được
+  // tổng hợp từ visitor_sessions và leads khi Admin mở màn hình.
+  if (!getSupabaseAccessToken()) return false;
   try {
     const response = await fetch(
       `${config.admin.supabaseUrl.replace(/\/$/, "")}/rest/v1/rpc/upsert_funnel_analytics`,
@@ -940,21 +945,66 @@ export async function loadCloudAnalytics(
     return null;
   }
   try {
-    const response = await fetch(
-      `${config.admin.supabaseUrl.replace(/\/$/, "")}/rest/v1/${CLOUD_ANALYTICS_TABLE}?id=eq.1&select=data`,
-      {
-        headers: {
-          apikey: config.admin.supabaseAnonKey,
-          Authorization: `Bearer ${bearer(config.admin.supabaseAnonKey)}`,
+    if (!getSupabaseAccessToken()) return null;
+    const base = config.admin.supabaseUrl.replace(/\/$/, "");
+    const headers = {
+      apikey: config.admin.supabaseAnonKey,
+      Authorization: `Bearer ${bearer(config.admin.supabaseAnonKey)}`,
+    };
+    const [sessionsResponse, leadsResponse] = await Promise.all([
+      fetch(
+        `${base}/rest/v1/visitor_sessions?select=source,content&limit=5000`,
+        { headers },
+      ),
+      fetch(
+        `${base}/rest/v1/leads?select=utm_source,traffic_ads_source,variant`,
+        {
+          headers,
         },
-      },
-    );
-    if (!response.ok) return null;
-    const rows = (await response.json()) as unknown;
-    if (!Array.isArray(rows) || !isRecord(rows[0])) return null;
-    cloudAnalyticsState = normalizeAnalytics(
-      rows[0]["data"] as Partial<AnalyticsState>,
-    );
+      ),
+    ]);
+    if (!sessionsResponse.ok || !leadsResponse.ok) return null;
+    const sessions = (await sessionsResponse.json()) as Array<{
+      source?: string | null;
+      content?: string | null;
+    }>;
+    const leads = (await leadsResponse.json()) as Array<{
+      utm_source?: string | null;
+      traffic_ads_source?: string | null;
+      variant?: string | null;
+    }>;
+    const aggregate = emptyAnalytics();
+    for (const session of sessions) {
+      const source = cleanSource(session.source || "direct");
+      aggregate.visits += 1;
+      aggregate.bySource[source] = (aggregate.bySource[source] || 0) + 1;
+      aggregate.bySourceStats[source] = aggregate.bySourceStats[source] || {
+        visits: 0,
+        leads: 0,
+      };
+      aggregate.bySourceStats[source].visits += 1;
+    }
+    for (const lead of leads) {
+      const source = cleanSource(
+        lead.utm_source || lead.traffic_ads_source || "direct",
+      );
+      aggregate.leads += 1;
+      aggregate.bySourceStats[source] = aggregate.bySourceStats[source] || {
+        visits: 0,
+        leads: 0,
+      };
+      aggregate.bySourceStats[source].leads += 1;
+      if (lead.variant) {
+        aggregate.byVariant[lead.variant] = aggregate.byVariant[
+          lead.variant
+        ] || {
+          visits: 0,
+          leads: 0,
+        };
+        aggregate.byVariant[lead.variant].leads += 1;
+      }
+    }
+    cloudAnalyticsState = aggregate;
     return structuredClone(cloudAnalyticsState);
   } catch {
     return null;

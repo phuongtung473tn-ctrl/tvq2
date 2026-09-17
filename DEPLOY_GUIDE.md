@@ -182,6 +182,26 @@ where proname in (
 Với project đã chạy schema cũ, chạy `supabase/admin_rls_patch.sql`. File này
 idempotent và tạo các RPC bảo vệ thao tác analytics/lead của Admin.
 
+### C2. Kiểm tra Analytics cloud
+
+Analytics không ghi tổng hợp trực tiếp từ visitor anon vào `funnel_analytics`.
+Landing ghi từng phiên vào `visitor_sessions`; sau khi Admin đăng nhập, màn hình
+**Thống Kê & Analytics** đọc `visitor_sessions` và `leads` rồi tổng hợp theo
+nguồn traffic. Vì vậy mở `/admin` một mình không tạo lượt truy cập; hãy mở
+trang landing thật bằng tab khác, chờ vài giây rồi tải lại Analytics.
+
+Kiểm tra nhanh trong SQL Editor:
+
+```sql
+select count(*) as sessions from public.visitor_sessions;
+select count(*) as leads from public.leads;
+select id, data from public.funnel_analytics where id = 1;
+```
+
+Nếu `visitor_sessions` vẫn bằng 0 sau khi mở landing, chạy lại
+`supabase/visitor_tracking.sql` để áp dụng quyền `insert` cho `anon`, sau đó
+redeploy frontend và mở lại trang landing. Không cấp quyền `select` cho `anon`.
+
 ---
 
 ## D. Cloud Cron-job (sao lưu định kỳ)
