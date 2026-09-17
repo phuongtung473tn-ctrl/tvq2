@@ -1014,8 +1014,7 @@ export async function loadCloudAnalytics(
       return { data: null, error: "admin_session_missing" };
     }
     const headers = {
-      "Accept-Profile": "public",
-      "Content-Profile": "public",
+      "Content-Type": "application/json",
       apikey: supabaseAnonKey,
       Authorization: `Bearer ${accessToken}`,
     };
