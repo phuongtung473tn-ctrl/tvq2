@@ -1340,6 +1340,7 @@ function WebhookModal({ onClose }: ModalProps) {
 
 /* ------------------------------ ANALYTICS --------------------------------- */
 function AnalyticsModal({ onClose }: ModalProps) {
+  const { logout } = useAdmin();
   const { config, ready: configReady } = useSiteConfig();
   const [a, setA] = useState<AnalyticsState | null>(null);
   const [actionMessage, setActionMessage] = useState<string | null>(null);
@@ -1414,7 +1415,19 @@ function AnalyticsModal({ onClose }: ModalProps) {
         <p className="mb-3 rounded-lg bg-amber-50 px-3 py-2 text-xs text-amber-800">
           Chưa đọc được Analytics cloud ({loadError}).
           {loadError === "admin_session_missing" ? (
-            <>Hãy đăng xuất, đăng nhập lại Admin rồi tải lại.</>
+            <>
+              Hãy đăng nhập lại Admin để làm mới phiên Supabase.
+              <button
+                type="button"
+                onClick={() => {
+                  logout();
+                  window.location.assign("/admin");
+                }}
+                className="ml-1 font-bold underline"
+              >
+                Đăng nhập lại
+              </button>
+            </>
           ) : (
             <>
               Kiểm tra migration

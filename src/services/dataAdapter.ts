@@ -965,16 +965,16 @@ export async function loadCloudAnalytics(
     return { data: null, error: "supabase_config_missing" };
   }
   try {
-    let accessToken = getSupabaseAccessToken();
+    const base = supabaseUrl.replace(/\/$/, "");
+    let accessToken = getSupabaseAccessToken(base);
     if (!accessToken) {
       await new Promise((resolve) => window.setTimeout(resolve, 150));
-      accessToken = getSupabaseAccessToken();
+      accessToken = getSupabaseAccessToken(base);
     }
     if (!accessToken) {
       console.warn("Analytics cloud skipped: Admin access token is missing");
       return { data: null, error: "admin_session_missing" };
     }
-    const base = supabaseUrl.replace(/\/$/, "");
     const headers = {
       apikey: supabaseAnonKey,
       Authorization: `Bearer ${accessToken}`,
