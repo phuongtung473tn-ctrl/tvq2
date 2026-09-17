@@ -2523,6 +2523,26 @@ function LandingEditorModal({ onClose }: ModalProps) {
         .map((line) => line.trim())
         .filter(Boolean);
     });
+  const applyStudyInChinaHero = () =>
+    update((draft) => {
+      draft.landing.heroEyebrow =
+        "Học THCS, THPT, Trung cấp, Cao đẳng hay Đại học?";
+      draft.landing.heroTitle =
+        "Tương lai không tự thay đổi nếu hôm nay bạn không dám";
+      draft.landing.heroHighlight = "lựa chọn.";
+      draft.landing.heroDescription =
+        "Bạn đang làm công nhân trong nhà máy, xí nghiệp?\nBạn đang làm công việc thu nhập thấp và chưa thấy tương lai?\nHay bạn vẫn chưa biết nên học gì để có một nghề ổn định?\n\nDu học nghề Trung Quốc - vừa học, vừa thực hành có lương từ 15-30 triệu/tháng.";
+      draft.landing.heroTrustItems = [
+        "Học bổng lên đến 75%",
+        "Không cần chứng chỉ HSK trước khi nhập học",
+        "Không chứng minh tài chính",
+        "Tốt nghiệp nhận bằng Cao đẳng chính quy, có thể liên thông Đại học",
+        "🚁 Drone/Flycam - thực hành với hệ sinh thái DJI",
+        "🚗 Công nghệ ô tô điện - định hướng thực hành theo hệ sinh thái BYD",
+        "💻 Thương mại điện tử, AI, IoT và Smart Home",
+      ];
+      draft.landing.heroCtaLabel = "Nhận lộ trình phù hợp";
+    });
   const updateJson = <
     K extends
       | "stats"
@@ -3308,6 +3328,13 @@ function LandingEditorModal({ onClose }: ModalProps) {
         </Field>
       </div>
       <Field label="Hero: nhãn trên đầu">
+        <button
+          type="button"
+          onClick={applyStudyInChinaHero}
+          className="mb-2 rounded-lg bg-primary px-3 py-2 text-xs font-bold text-primary-foreground"
+        >
+          Áp dụng nội dung Du học nghề Trung Quốc
+        </button>
         <TextInput
           value={content.heroEyebrow}
           onChange={(e) =>

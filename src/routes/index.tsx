@@ -426,7 +426,7 @@ function Landing() {
         <div className="absolute inset-0 bg-surface/68" />
         <div className="relative mx-auto grid max-w-6xl gap-8 px-4 pb-14 pt-7 sm:gap-12 sm:py-16 lg:grid-cols-[1.1fr_0.9fr] lg:items-center lg:py-24">
           <div className="text-surface-foreground">
-            <span className="inline-flex items-center gap-2 rounded-full bg-gold px-3 py-1.5 text-xs font-extrabold uppercase tracking-wide text-gold-foreground">
+            <span className="inline-flex max-w-full items-center rounded-full bg-gold px-3 py-1.5 text-xs font-extrabold leading-relaxed tracking-wide text-gold-foreground">
               {content.heroEyebrow}
             </span>
             <h1 className="mt-6 text-3xl font-black leading-[1.12] sm:text-4xl lg:text-[3.25rem]">
@@ -453,9 +453,15 @@ function Landing() {
                 {config.countdown.headline}
               </span>
             </div>
-            <ul className="mt-9 grid gap-2.5 text-sm text-surface-foreground/80 sm:grid-cols-2">
+            <ul className="mt-9 grid gap-2.5 text-sm text-surface-foreground/90 sm:grid-cols-2">
               {content.heroTrustItems.map((item) => (
-                <li key={item}>✓ {item}</li>
+                <li
+                  key={item}
+                  className="flex min-w-0 items-start gap-2 rounded-lg bg-white/5 px-3 py-2 leading-relaxed"
+                >
+                  <span className="mt-0.5 shrink-0 text-gold">✓</span>
+                  <span>{item}</span>
+                </li>
               ))}
             </ul>
           </div>
