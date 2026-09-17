@@ -1019,15 +1019,37 @@ export async function loadCloudAnalytics(
       apikey: supabaseAnonKey,
       Authorization: `Bearer ${accessToken}`,
     };
-    const response = await fetch(`${base}/rest/v1/rpc/get_funnel_analytics`, {
+    let response = await fetch(`${base}/rest/v1/rpc/get_funnel_analytics`, {
       method: "POST",
       headers,
       body: "{}",
     });
     if (!response.ok) {
+      const initialStatus = response.status;
       const detail = await response.text();
-      console.warn(`Analytics cloud RPC failed [${response.status}]`, detail);
-      if (response.status === 404) {
+      console.warn(`Analytics cloud RPC failed [${initialStatus}]`, detail);
+      if (initialStatus === 404) {
+        const retryHeaders = { ...headers };
+        delete retryHeaders["Accept-Profile"];
+        delete retryHeaders["Content-Profile"];
+        response = await fetch(`${base}/rest/v1/rpc/get_funnel_analytics`, {
+          method: "POST",
+          headers: retryHeaders,
+          body: "{}",
+        });
+        if (response.ok) {
+          const retryRows = (await response.json()) as Array<{
+            data?: unknown;
+          }>;
+          if (isRecord(retryRows[0]?.data)) {
+            cloudAnalyticsState = normalizeAnalytics(
+              retryRows[0].data as Partial<AnalyticsState>,
+            );
+            return { data: structuredClone(cloudAnalyticsState) };
+          }
+        }
+      }
+      if (initialStatus === 404) {
         const [sessionsResponse, leadsResponse] = await Promise.all([
           fetch(`${base}/rest/v1/visitor_sessions?select=source&limit=5000`, {
             headers,
@@ -1050,7 +1072,7 @@ export async function loadCloudAnalytics(
           return { data: structuredClone(cloudAnalyticsState) };
         }
       }
-      return { data: null, error: `rpc_${response.status}@${base}` };
+      return { data: null, error: `rpc_${initialStatus}@${base}` };
     }
     const rows = (await response.json()) as Array<{ data?: unknown }>;
     if (!isRecord(rows[0]?.data)) {
