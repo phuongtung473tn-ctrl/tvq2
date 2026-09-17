@@ -962,60 +962,17 @@ export async function loadCloudAnalytics(
       apikey: config.admin.supabaseAnonKey,
       Authorization: `Bearer ${bearer(config.admin.supabaseAnonKey)}`,
     };
-    const [sessionsResponse, leadsResponse] = await Promise.all([
-      fetch(
-        `${base}/rest/v1/visitor_sessions?select=source,content&limit=5000`,
-        { headers },
-      ),
-      fetch(
-        `${base}/rest/v1/leads?select=utm_source,traffic_ads_source,variant`,
-        {
-          headers,
-        },
-      ),
-    ]);
-    if (!sessionsResponse.ok || !leadsResponse.ok) return null;
-    const sessions = (await sessionsResponse.json()) as Array<{
-      source?: string | null;
-      content?: string | null;
-    }>;
-    const leads = (await leadsResponse.json()) as Array<{
-      utm_source?: string | null;
-      traffic_ads_source?: string | null;
-      variant?: string | null;
-    }>;
-    const aggregate = emptyAnalytics();
-    for (const session of sessions) {
-      const source = cleanSource(session.source || "direct");
-      aggregate.visits += 1;
-      aggregate.bySource[source] = (aggregate.bySource[source] || 0) + 1;
-      aggregate.bySourceStats[source] = aggregate.bySourceStats[source] || {
-        visits: 0,
-        leads: 0,
-      };
-      aggregate.bySourceStats[source].visits += 1;
-    }
-    for (const lead of leads) {
-      const source = cleanSource(
-        lead.utm_source || lead.traffic_ads_source || "direct",
-      );
-      aggregate.leads += 1;
-      aggregate.bySourceStats[source] = aggregate.bySourceStats[source] || {
-        visits: 0,
-        leads: 0,
-      };
-      aggregate.bySourceStats[source].leads += 1;
-      if (lead.variant) {
-        aggregate.byVariant[lead.variant] = aggregate.byVariant[
-          lead.variant
-        ] || {
-          visits: 0,
-          leads: 0,
-        };
-        aggregate.byVariant[lead.variant].leads += 1;
-      }
-    }
-    cloudAnalyticsState = aggregate;
+    const response = await fetch(`${base}/rest/v1/rpc/get_funnel_analytics`, {
+      method: "POST",
+      headers,
+      body: "{}",
+    });
+    if (!response.ok) return null;
+    const rows = (await response.json()) as Array<{ data?: unknown }>;
+    if (!isRecord(rows[0]?.data)) return null;
+    cloudAnalyticsState = normalizeAnalytics(
+      rows[0].data as Partial<AnalyticsState>,
+    );
     return structuredClone(cloudAnalyticsState);
   } catch {
     return null;

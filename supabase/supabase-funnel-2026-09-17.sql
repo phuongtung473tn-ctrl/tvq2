@@ -65,6 +65,27 @@ $$;
 revoke all on function public.record_visitor_session(text, text, text, text, text, text, text, text, text, text) from public;
 grant execute on function public.record_visitor_session(text, text, text, text, text, text, text, text, text, text) to anon, authenticated;
 
+create or replace function public.get_funnel_analytics()
+returns table(data jsonb)
+language plpgsql security definer set search_path = public
+as $$
+declare
+	result jsonb := jsonb_build_object('visits', (select count(*) from public.visitor_sessions), 'leads', (select count(*) from public.leads), 'bySource', '{}'::jsonb, 'bySourceStats', '{}'::jsonb, 'byVariant', '{}'::jsonb);
+	item record; source_name text; visit_count bigint; lead_count bigint;
+begin
+	if not public.is_funnel_admin() then raise exception 'admin access required'; end if;
+	for item in select coalesce(nullif(source, ''), 'direct') as source_name, count(*) as visit_count from public.visitor_sessions group by 1 loop
+		source_name := item.source_name; visit_count := item.visit_count;
+		select count(*) into lead_count from public.leads where coalesce(nullif(utm_source, ''), nullif(traffic_ads_source, ''), 'direct') = source_name;
+		result := jsonb_set(result, array['bySource', source_name], to_jsonb(visit_count), true);
+		result := jsonb_set(result, array['bySourceStats', source_name], jsonb_build_object('visits', visit_count, 'leads', lead_count), true);
+	end loop;
+	return query select result;
+end;
+$$;
+revoke all on function public.get_funnel_analytics() from public;
+grant execute on function public.get_funnel_analytics() to authenticated;
+
 update public.funnel_configs set data = data #- '{admin,password}' where id = 1;
 
 create table if not exists public.admin_users (user_id uuid primary key references auth.users(id) on delete cascade, email text not null, role text not null default 'admin' check (role in ('admin', 'owner')), enabled boolean not null default true, created_at timestamptz not null default now());

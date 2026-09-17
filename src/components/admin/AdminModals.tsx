@@ -1337,11 +1337,17 @@ function AnalyticsModal({ onClose }: ModalProps) {
   const { config } = useSiteConfig();
   const [a, setA] = useState<AnalyticsState | null>(null);
   const [actionMessage, setActionMessage] = useState<string | null>(null);
+  const [loadError, setLoadError] = useState(false);
   useEffect(() => {
     const refresh = () => setA(loadAnalytics());
     refresh();
     void loadCloudAnalytics(config).then((cloud) => {
-      if (cloud) setA(cloud);
+      if (cloud) {
+        setA(cloud);
+        setLoadError(false);
+      } else if (config.admin.storageMode === "database") {
+        setLoadError(true);
+      }
     });
     window.addEventListener(ANALYTICS_UPDATED_EVENT, refresh);
     return () => window.removeEventListener(ANALYTICS_UPDATED_EVENT, refresh);
@@ -1385,6 +1391,14 @@ function AnalyticsModal({ onClose }: ModalProps) {
           </p>
         )}
       </div>
+      {loadError && (
+        <p className="mb-3 rounded-lg bg-amber-50 px-3 py-2 text-xs text-amber-800">
+          Chưa đọc được Analytics cloud. Hãy chạy migration
+          <code className="mx-1 font-bold">supabase/visitor_tracking.sql</code>
+          để tạo RPC <code className="font-bold">get_funnel_analytics</code>,
+          rồi tải lại trang.
+        </p>
+      )}
       <div className="grid grid-cols-3 gap-2">
         <Stat label="Lượt truy cập" value={a?.visits ?? 0} />
         <Stat

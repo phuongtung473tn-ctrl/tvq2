@@ -205,6 +205,8 @@ redeploy frontend và mở lại trang landing. Không cấp quyền `select` ch
 Migration mới cũng tạo RPC `record_visitor_session`. RPC này là bắt buộc để
 Footer nhận được tổng số lượt hôm nay/tháng mà vẫn giữ RLS an toàn; nếu request
 `/rest/v1/rpc/record_visitor_session` trả `404`, schema cloud chưa được cập nhật.
+Migration cũng tạo RPC `get_funnel_analytics`, là nguồn dữ liệu của màn hình
+Admin Analytics. Nếu RPC này trả `404`, màn hình sẽ không thể đọc số liệu cloud.
 
 ---
 
