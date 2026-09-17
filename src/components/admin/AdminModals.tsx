@@ -1,6 +1,12 @@
 import { checkEmailConfig, sendTestEmail } from "@/lib/email.functions";
 import { Download, GraduationCap, Plus, Trash2 } from "lucide-react";
-import { useEffect, useRef, useState, type ReactElement } from "react";
+import {
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+  type ReactElement,
+} from "react";
 
 import { useAdmin, type AdminModalKey } from "@/lib/use-admin";
 import { DEFAULT_CONFIG } from "@/config/site-config";
@@ -1338,20 +1344,25 @@ function AnalyticsModal({ onClose }: ModalProps) {
   const [a, setA] = useState<AnalyticsState | null>(null);
   const [actionMessage, setActionMessage] = useState<string | null>(null);
   const [loadError, setLoadError] = useState(false);
+  const [loadingCloud, setLoadingCloud] = useState(false);
+  const reloadCloudAnalytics = useCallback(async () => {
+    setLoadingCloud(true);
+    const cloud = await loadCloudAnalytics(config);
+    if (cloud) {
+      setA(cloud);
+      setLoadError(false);
+    } else if (config.admin.storageMode === "database") {
+      setLoadError(true);
+    }
+    setLoadingCloud(false);
+  }, [config]);
   useEffect(() => {
     const refresh = () => setA(loadAnalytics());
     refresh();
-    void loadCloudAnalytics(config).then((cloud) => {
-      if (cloud) {
-        setA(cloud);
-        setLoadError(false);
-      } else if (config.admin.storageMode === "database") {
-        setLoadError(true);
-      }
-    });
+    void reloadCloudAnalytics();
     window.addEventListener(ANALYTICS_UPDATED_EVENT, refresh);
     return () => window.removeEventListener(ANALYTICS_UPDATED_EVENT, refresh);
-  }, [config]);
+  }, [config, reloadCloudAnalytics]);
   const cr =
     a && a.visits > 0 ? ((a.leads / a.visits) * 100).toFixed(1) : "0.0";
   return (
@@ -1398,6 +1409,16 @@ function AnalyticsModal({ onClose }: ModalProps) {
           để tạo RPC <code className="font-bold">get_funnel_analytics</code>,
           rồi tải lại trang.
         </p>
+      )}
+      {config.admin.storageMode === "database" && (
+        <button
+          type="button"
+          onClick={() => void reloadCloudAnalytics()}
+          disabled={loadingCloud}
+          className="mb-3 rounded-lg border border-neutral-300 px-3 py-1.5 text-[11px] font-bold text-neutral-700 disabled:opacity-50"
+        >
+          {loadingCloud ? "Đang tải Analytics..." : "Tải lại Analytics cloud"}
+        </button>
       )}
       <div className="grid grid-cols-3 gap-2">
         <Stat label="Lượt truy cập" value={a?.visits ?? 0} />
