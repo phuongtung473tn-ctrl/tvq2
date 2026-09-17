@@ -1346,10 +1346,13 @@ function AnalyticsModal({ onClose }: ModalProps) {
   const [actionMessage, setActionMessage] = useState<string | null>(null);
   const [loadError, setLoadError] = useState<string | null>(null);
   const [loadingCloud, setLoadingCloud] = useState(false);
+  const analyticsRequest = useRef(0);
   const reloadCloudAnalytics = useCallback(async () => {
     if (!configReady) return;
+    const requestId = ++analyticsRequest.current;
     setLoadingCloud(true);
     const result = await loadCloudAnalytics(config);
+    if (requestId !== analyticsRequest.current) return;
     if (result.data) {
       setA(result.data);
       setLoadError(null);

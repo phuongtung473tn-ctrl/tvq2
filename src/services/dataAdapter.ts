@@ -1004,10 +1004,10 @@ export async function loadCloudAnalytics(
   }
   try {
     const base = supabaseUrl.replace(/\/$/, "");
-    let accessToken = getSupabaseAccessToken(base);
+    let accessToken = getSupabaseAccessToken();
     if (!accessToken) {
       await new Promise((resolve) => window.setTimeout(resolve, 150));
-      accessToken = getSupabaseAccessToken(base);
+      accessToken = getSupabaseAccessToken();
     }
     if (!accessToken) {
       console.warn("Analytics cloud skipped: Admin access token is missing");

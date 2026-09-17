@@ -43,23 +43,6 @@ function isBrowser() {
   return typeof window !== "undefined";
 }
 
-function tokenIssuerMatches(token: string, url: string): boolean {
-  try {
-    const payload = token.split(".")[1];
-    if (!payload) return false;
-    const normalized = payload.replace(/-/g, "+").replace(/_/g, "/");
-    const claims = JSON.parse(
-      atob(normalized.padEnd(Math.ceil(normalized.length / 4) * 4, "=")),
-    ) as { iss?: unknown };
-    return (
-      typeof claims.iss === "string" &&
-      claims.iss.replace(/\/$/, "") === `${url.replace(/\/$/, "")}/auth/v1`
-    );
-  } catch {
-    return false;
-  }
-}
-
 export function clearSupabaseAccessToken(): void {
   if (!isBrowser()) return;
   try {
@@ -69,15 +52,11 @@ export function clearSupabaseAccessToken(): void {
   }
 }
 
-export function getSupabaseAccessToken(expectedUrl?: string): string {
+export function getSupabaseAccessToken(): string {
   if (!isBrowser()) return "";
   try {
     const token = window.sessionStorage.getItem(ACCESS_TOKEN_KEY) || "";
-    if (
-      token &&
-      (tokenIsExpired(token) ||
-        (expectedUrl && !tokenIssuerMatches(token, expectedUrl)))
-    ) {
+    if (token && tokenIsExpired(token)) {
       window.sessionStorage.removeItem(ACCESS_TOKEN_KEY);
       return "";
     }
