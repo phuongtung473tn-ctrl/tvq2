@@ -904,12 +904,8 @@ function saveAnalytics(state: AnalyticsState): void {
   if (!isBrowser()) return;
   const config = loadConfig();
   if (config.admin.storageMode === "database") {
-    window.dispatchEvent(
-      new CustomEvent<AnalyticsState>(ANALYTICS_UPDATED_EVENT, {
-        detail: state,
-      }),
-    );
-    void syncAnalyticsToSupabase(state, config);
+    // Database Mode lấy số liệu từ visitor_sessions và leads. Không phát
+    // state local rỗng để ghi đè kết quả cloud trong Admin Analytics.
     return;
   }
   window.localStorage.setItem(ANALYTICS_KEY, JSON.stringify(state));

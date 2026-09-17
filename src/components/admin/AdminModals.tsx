@@ -1357,8 +1357,14 @@ function AnalyticsModal({ onClose }: ModalProps) {
     setLoadingCloud(false);
   }, [config]);
   useEffect(() => {
-    const refresh = () => setA(loadAnalytics());
-    refresh();
+    const refresh = () => {
+      if (config.admin.storageMode === "database") {
+        void reloadCloudAnalytics();
+      } else {
+        setA(loadAnalytics());
+      }
+    };
+    if (config.admin.storageMode !== "database") setA(loadAnalytics());
     void reloadCloudAnalytics();
     window.addEventListener(ANALYTICS_UPDATED_EVENT, refresh);
     return () => window.removeEventListener(ANALYTICS_UPDATED_EVENT, refresh);
