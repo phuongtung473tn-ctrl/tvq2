@@ -23,7 +23,6 @@ const BACKUP_KEY = "funnel_backup_snapshots_v1";
 export const LEAD_CREATED_EVENT = "funnel:lead-created";
 export const ANALYTICS_UPDATED_EVENT = "funnel:analytics-updated";
 const CLOUD_CONFIG_TABLE = "funnel_configs";
-const CLOUD_ANALYTICS_TABLE = "funnel_analytics";
 const LOCAL_MIGRATION_KEY = "funnel_supabase_migrated_leads_v1";
 const REMOTE_LEAD_TIMEOUT_MS = 3_000;
 const REMOTE_DUPLICATE_TIMEOUT_MS = 1_500;
@@ -825,6 +824,46 @@ export interface CloudAnalyticsResult {
   error?: string;
 }
 
+function aggregateCloudAnalytics(
+  sessions: Array<{ source?: string | null }>,
+  leads: Array<{
+    utm_source?: string | null;
+    traffic_ads_source?: string | null;
+    variant?: string | null;
+  }>,
+): AnalyticsState {
+  const aggregate = emptyAnalytics();
+  for (const session of sessions) {
+    const source = cleanSource(session.source || "direct");
+    aggregate.visits += 1;
+    aggregate.bySource[source] = (aggregate.bySource[source] || 0) + 1;
+    aggregate.bySourceStats[source] = aggregate.bySourceStats[source] || {
+      visits: 0,
+      leads: 0,
+    };
+    aggregate.bySourceStats[source].visits += 1;
+  }
+  for (const lead of leads) {
+    const source = cleanSource(
+      lead.utm_source || lead.traffic_ads_source || "direct",
+    );
+    aggregate.leads += 1;
+    aggregate.bySourceStats[source] = aggregate.bySourceStats[source] || {
+      visits: 0,
+      leads: 0,
+    };
+    aggregate.bySourceStats[source].leads += 1;
+    if (lead.variant) {
+      aggregate.byVariant[lead.variant] = aggregate.byVariant[lead.variant] || {
+        visits: 0,
+        leads: 0,
+      };
+      aggregate.byVariant[lead.variant].leads += 1;
+    }
+  }
+  return aggregate;
+}
+
 let cloudAnalyticsState: AnalyticsState | null = null;
 
 function emptyAnalytics(): AnalyticsState {
@@ -923,8 +962,6 @@ async function syncAnalyticsToSupabase(
   state: AnalyticsState,
   config: SiteConfig,
 ): Promise<boolean> {
-  // Visitor không được ghi bảng tổng hợp bằng anon. Analytics cloud được
-  // tổng hợp từ visitor_sessions và leads khi Admin mở màn hình.
   if (!getSupabaseAccessToken()) return false;
   try {
     const response = await fetch(
@@ -933,6 +970,7 @@ async function syncAnalyticsToSupabase(
         method: "POST",
         headers: {
           "Content-Type": "application/json",
+          "Content-Profile": "public",
           apikey: config.admin.supabaseAnonKey,
           Authorization: `Bearer ${bearer(config.admin.supabaseAnonKey)}`,
         },
@@ -976,6 +1014,8 @@ export async function loadCloudAnalytics(
       return { data: null, error: "admin_session_missing" };
     }
     const headers = {
+      "Accept-Profile": "public",
+      "Content-Profile": "public",
       apikey: supabaseAnonKey,
       Authorization: `Bearer ${accessToken}`,
     };
@@ -987,6 +1027,29 @@ export async function loadCloudAnalytics(
     if (!response.ok) {
       const detail = await response.text();
       console.warn(`Analytics cloud RPC failed [${response.status}]`, detail);
+      if (response.status === 404) {
+        const [sessionsResponse, leadsResponse] = await Promise.all([
+          fetch(`${base}/rest/v1/visitor_sessions?select=source&limit=5000`, {
+            headers,
+          }),
+          fetch(
+            `${base}/rest/v1/leads?select=utm_source,traffic_ads_source,variant&limit=5000`,
+            { headers },
+          ),
+        ]);
+        if (sessionsResponse.ok && leadsResponse.ok) {
+          const sessions = (await sessionsResponse.json()) as Array<{
+            source?: string | null;
+          }>;
+          const leads = (await leadsResponse.json()) as Array<{
+            utm_source?: string | null;
+            traffic_ads_source?: string | null;
+            variant?: string | null;
+          }>;
+          cloudAnalyticsState = aggregateCloudAnalytics(sessions, leads);
+          return { data: structuredClone(cloudAnalyticsState) };
+        }
+      }
       return { data: null, error: `rpc_${response.status}@${base}` };
     }
     const rows = (await response.json()) as Array<{ data?: unknown }>;
