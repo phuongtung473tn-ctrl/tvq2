@@ -50,8 +50,8 @@ begin
   if not public.is_funnel_admin() then
     raise exception 'admin access required';
   end if;
-  delete from public.visitor_sessions;
-  delete from public.leads;
+  delete from public.visitor_sessions where true;
+  delete from public.leads where true;
   insert into public.funnel_analytics (id, data, updated_at)
   values (1, '{"visits":0,"leads":0,"bySource":{},"bySourceStats":{},"byVariant":{}}'::jsonb, now())
   on conflict (id) do update
@@ -71,7 +71,7 @@ begin
   if not public.is_funnel_admin() then
     raise exception 'admin access required';
   end if;
-  delete from public.leads;
+  delete from public.leads where true;
 end;
 $$;
 revoke all on function public.clear_funnel_leads() from public;

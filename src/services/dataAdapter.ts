@@ -1141,7 +1141,14 @@ export async function clearAnalytics(config?: SiteConfig): Promise<boolean> {
           body: "{}",
         },
       );
-      if (!response.ok) return false;
+      if (!response.ok) {
+        console.warn(
+          "Analytics reset failed",
+          response.status,
+          await response.text(),
+        );
+        return false;
+      }
       cloudAnalyticsState = emptyAnalytics();
       window.dispatchEvent(
         new CustomEvent<AnalyticsState>(ANALYTICS_UPDATED_EVENT, {
