@@ -73,6 +73,10 @@ export interface VisitorMetrics {
   hardwareConcurrency: number | null;
   batteryLevelPercent: number | null;
   batteryCharging: boolean | null;
+  screenWidth: number | null;
+  screenHeight: number | null;
+  pixelRatio: number | null;
+  maxTouchPoints: number | null;
   sessionCounts: VisitorSessionCounts;
 }
 
@@ -117,6 +121,10 @@ export interface BehaviorData {
   hardware_concurrency: number | null;
   battery_level_percent: number | null;
   battery_charging: boolean | null;
+  screen_width: number | null;
+  screen_height: number | null;
+  pixel_ratio: number | null;
+  max_touch_points: number | null;
   client_ip: string;
   location_city: string;
   location_region: string;

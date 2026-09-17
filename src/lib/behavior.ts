@@ -294,6 +294,22 @@ function generateSaleAdvice(
     );
   }
 
+  if (data.battery_level_percent != null && data.battery_level_percent <= 20) {
+    advice.push(
+      "[BATTERY] Khách đang dùng pin thấp — ưu tiên nhắn tin ngắn gọn, gửi tài liệu sau cuộc gọi.",
+    );
+  }
+  if (data.is_in_app_browser) {
+    advice.push(
+      "[APP] Khách mở từ ứng dụng mạng xã hội — gửi lời chào ngay trên kênh đã tạo chuyển đổi và xin khung giờ tiện gọi.",
+    );
+  }
+  if (data.time_to_first_interaction_seconds === 0) {
+    advice.push(
+      "[FAST] Khách tương tác ngay — mở đầu bằng câu hỏi mục tiêu: muốn chọn ngành, kiểm tra điều kiện hay nhận lộ trình chi phí.",
+    );
+  }
+
   if (data.hardware_concurrency != null && data.hardware_concurrency <= 2) {
     advice.push(
       `[NOTE] Thiết bị phần cứng yếu (${data.hardware_concurrency} nhân), ưu tiên nhắn Zalo thay vì gọi điện.`,
@@ -325,6 +341,7 @@ function formatWebhookText(value: string): string {
     .replaceAll("[WARN]", "⚠️")
     .replaceAll("[REVIEW]", "🔎")
     .replaceAll("[INFO]", "ℹ️")
+    .replaceAll("[TIME]", "⏱️")
     .replaceAll("[SLOW]", "⏳")
     .replaceAll("[GEO]", "📍")
     .replaceAll("[NIGHT]", "🌙")
@@ -336,7 +353,10 @@ function formatWebhookText(value: string): string {
     .replaceAll("[COPY]", "📋")
     .replaceAll("[UPDOWN]", "↕️")
     .replaceAll("[BOT]", "🤖")
-    .replaceAll("[APP]", "📲");
+    .replaceAll("[APP]", "📲")
+    .replaceAll("[BATTERY]", "🔋")
+    .replaceAll("[FAST]", "⚡")
+    .replaceAll("[NOTE]", "📝");
 }
 
 function generateBehaviorSummary(data: BehaviorData): string {
@@ -412,6 +432,10 @@ function generateDeviceTechInfo(data: BehaviorData): string {
     data.battery_level_percent != null
       ? `🔋 Pin ${data.battery_level_percent}%${data.battery_charging ? " · đang sạc" : ""}`
       : "🔋 Pin không khả dụng";
+  const mobileHardware =
+    data.screen_width != null && data.screen_height != null
+      ? `📐 Màn hình ${data.screen_width}×${data.screen_height}px · DPR ${data.pixel_ratio ?? "?"} · cảm ứng ${data.max_touch_points ?? 0} điểm`
+      : "📐 Thông tin màn hình không khả dụng";
   return [
     `📱 ${deviceName || "Thiết bị chưa nhận diện"}`,
     `🧩 ${os || "Hệ điều hành chưa rõ"}`,
@@ -419,6 +443,7 @@ function generateDeviceTechInfo(data: BehaviorData): string {
     data.is_in_app_browser ? "📲 Mở trong app (FB/TikTok/Zalo)" : "",
     `📡 ${data.network_label}`,
     `💻 ${hwInfo}`,
+    mobileHardware,
     battery,
   ]
     .filter(Boolean)

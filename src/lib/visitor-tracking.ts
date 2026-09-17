@@ -49,6 +49,10 @@ type RuntimeState = {
   hardwareConcurrency: number | null;
   batteryLevelPercent: number | null;
   batteryCharging: boolean | null;
+  screenWidth: number | null;
+  screenHeight: number | null;
+  pixelRatio: number | null;
+  maxTouchPoints: number | null;
   sectionTime: Record<string, number>;
   visibleSections: Record<string, number>;
   visitorId: string;
@@ -121,6 +125,10 @@ const runtime: RuntimeState = {
   hardwareConcurrency: null,
   batteryLevelPercent: null,
   batteryCharging: null,
+  screenWidth: null,
+  screenHeight: null,
+  pixelRatio: null,
+  maxTouchPoints: null,
   sectionTime: {},
   visibleSections: {},
   visitorId: "",
@@ -514,6 +522,10 @@ function computeMetrics(): VisitorMetrics {
     hardwareConcurrency: runtime.hardwareConcurrency,
     batteryLevelPercent: runtime.batteryLevelPercent,
     batteryCharging: runtime.batteryCharging,
+    screenWidth: runtime.screenWidth,
+    screenHeight: runtime.screenHeight,
+    pixelRatio: runtime.pixelRatio,
+    maxTouchPoints: runtime.maxTouchPoints,
     sessionCounts: runtime.sessionCounts,
   };
 }
@@ -757,6 +769,13 @@ function detectHardwareInfo() {
   runtime.hardwareConcurrency =
     typeof nav.hardwareConcurrency === "number"
       ? nav.hardwareConcurrency
+      : null;
+  runtime.screenWidth = window.screen.width || null;
+  runtime.screenHeight = window.screen.height || null;
+  runtime.pixelRatio = window.devicePixelRatio || null;
+  runtime.maxTouchPoints =
+    typeof navigator.maxTouchPoints === "number"
+      ? navigator.maxTouchPoints
       : null;
 }
 
@@ -1030,6 +1049,10 @@ export function collectBehavior(form: {
     hardware_concurrency: snapshot.metrics.hardwareConcurrency,
     battery_level_percent: snapshot.metrics.batteryLevelPercent,
     battery_charging: snapshot.metrics.batteryCharging,
+    screen_width: snapshot.metrics.screenWidth,
+    screen_height: snapshot.metrics.screenHeight,
+    pixel_ratio: snapshot.metrics.pixelRatio,
+    max_touch_points: snapshot.metrics.maxTouchPoints,
     client_ip: snapshot.network.ip,
     location_city: snapshot.network.city,
     location_region: snapshot.network.region,
