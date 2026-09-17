@@ -435,7 +435,7 @@ function Landing() {
                 {content.heroHighlight}
               </span>
             </h1>
-            <p className="mt-5 max-w-xl text-base leading-relaxed text-surface-foreground/85 sm:text-lg">
+            <p className="mt-5 max-w-xl whitespace-pre-line text-base leading-relaxed text-surface-foreground/85 sm:text-lg">
               {content.heroDescription}
             </p>
             <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:items-center">
