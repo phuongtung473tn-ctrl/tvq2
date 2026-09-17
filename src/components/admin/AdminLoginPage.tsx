@@ -35,15 +35,17 @@ export function AdminLoginPage() {
     setError(
       ok.reason === "email_not_confirmed"
         ? "Email Supabase chưa được xác nhận. Hãy xác nhận email hoặc tắt Confirm email trong Supabase Auth rồi thử lại."
-        : ok.reason === "invalid_credentials"
-          ? "Email hoặc mật khẩu Supabase Auth không đúng."
-          : ok.reason === "not_admin"
-            ? "Tài khoản đăng nhập chưa có dòng enabled = true trong bảng admin_users."
-            : ok.reason === "admin_lookup_failed"
-              ? "Không đọc được quyền admin_users. Kiểm tra RLS/policy Supabase."
-              : ok.reason === "network_error"
-                ? "Không kết nối được Supabase. Kiểm tra URL, key và mạng."
-                : "Supabase Auth từ chối đăng nhập. Kiểm tra cấu hình project.",
+        : ok.reason === "email_provider_disabled"
+          ? "Supabase đang tắt đăng nhập bằng Email. Vào Authentication > Providers > Email và bật Email provider, sau đó thử lại."
+          : ok.reason === "invalid_credentials"
+            ? "Email hoặc mật khẩu Supabase Auth không đúng."
+            : ok.reason === "not_admin"
+              ? "Tài khoản đăng nhập chưa có dòng enabled = true trong bảng admin_users."
+              : ok.reason === "admin_lookup_failed"
+                ? "Không đọc được quyền admin_users. Kiểm tra RLS/policy Supabase."
+                : ok.reason === "network_error"
+                  ? "Không kết nối được Supabase. Kiểm tra URL, key và mạng."
+                  : "Supabase Auth từ chối đăng nhập. Kiểm tra cấu hình project.",
     );
   }
 

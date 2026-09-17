@@ -7,6 +7,7 @@ export type SupabaseSignInResult =
       reason:
         | "invalid_credentials"
         | "email_not_confirmed"
+        | "email_provider_disabled"
         | "auth_failed"
         | "user_lookup_failed"
         | "admin_lookup_failed"
@@ -95,6 +96,11 @@ export async function signInWithSupabase(
         error?.error === "email_not_confirmed"
       )
         return { ok: false, reason: "email_not_confirmed" };
+      if (
+        error?.error_code === "email_provider_disabled" ||
+        error?.error === "email_provider_disabled"
+      )
+        return { ok: false, reason: "email_provider_disabled" };
       if (
         error?.error_code === "invalid_credentials" ||
         error?.error === "invalid_credentials"
