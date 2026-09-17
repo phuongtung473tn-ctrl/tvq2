@@ -47,6 +47,8 @@ type RuntimeState = {
   lastScrollTime: number;
   deviceMemory: number | null;
   hardwareConcurrency: number | null;
+  batteryLevelPercent: number | null;
+  batteryCharging: boolean | null;
   sectionTime: Record<string, number>;
   visibleSections: Record<string, number>;
   visitorId: string;
@@ -117,6 +119,8 @@ const runtime: RuntimeState = {
   lastScrollTime: 0,
   deviceMemory: null,
   hardwareConcurrency: null,
+  batteryLevelPercent: null,
+  batteryCharging: null,
   sectionTime: {},
   visibleSections: {},
   visitorId: "",
@@ -508,6 +512,8 @@ function computeMetrics(): VisitorMetrics {
     submissionCountSameVisitor: 0,
     deviceMemory: runtime.deviceMemory,
     hardwareConcurrency: runtime.hardwareConcurrency,
+    batteryLevelPercent: runtime.batteryLevelPercent,
+    batteryCharging: runtime.batteryCharging,
     sessionCounts: runtime.sessionCounts,
   };
 }
@@ -754,6 +760,31 @@ function detectHardwareInfo() {
       : null;
 }
 
+async function detectBatteryInfo() {
+  if (!isBrowser()) return;
+  const nav = navigator as Navigator & {
+    getBattery?: () => Promise<{
+      level: number;
+      charging: boolean;
+      addEventListener: (name: string, listener: () => void) => void;
+    }>;
+  };
+  if (!nav.getBattery) return;
+  try {
+    const battery = await nav.getBattery();
+    const update = () => {
+      runtime.batteryLevelPercent = Math.round(battery.level * 100);
+      runtime.batteryCharging = battery.charging;
+      updateSnapshot();
+    };
+    update();
+    battery.addEventListener("levelchange", update);
+    battery.addEventListener("chargingchange", update);
+  } catch {
+    /* Battery API is unavailable in many mobile browsers. */
+  }
+}
+
 export function initVisitorTracking(options: VisitorTrackingInitOptions = {}) {
   if (!isBrowser()) return () => {};
   runtime.options = options;
@@ -794,6 +825,7 @@ export function initVisitorTracking(options: VisitorTrackingInitOptions = {}) {
   runtime.attribution = readAttribution();
   runtime.sessionCounts = readLocalSessionCounts(isNewSession);
   detectHardwareInfo();
+  void detectBatteryInfo();
   runtime.network = {
     ...defaultNetwork,
     connectionType: detectConnectionType(),
@@ -996,6 +1028,8 @@ export function collectBehavior(form: {
     network_flags: snapshot.network.flags,
     device_memory: snapshot.metrics.deviceMemory,
     hardware_concurrency: snapshot.metrics.hardwareConcurrency,
+    battery_level_percent: snapshot.metrics.batteryLevelPercent,
+    battery_charging: snapshot.metrics.batteryCharging,
     client_ip: snapshot.network.ip,
     location_city: snapshot.network.city,
     location_region: snapshot.network.region,

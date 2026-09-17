@@ -208,6 +208,10 @@ Footer nhận được tổng số lượt hôm nay/tháng mà vẫn giữ RLS a
 Migration cũng tạo RPC `get_funnel_analytics`, là nguồn dữ liệu của màn hình
 Admin Analytics. Nếu RPC này trả `404`, màn hình sẽ không thể đọc số liệu cloud.
 
+Thông tin phần cứng và pin được gửi trong `device_tech_info`. RAM và số lõi có
+thể bị trình duyệt giới hạn; Safari iOS không hỗ trợ Battery API đầy đủ, nên
+trường hợp này sẽ ghi `Pin không khả dụng` thay vì suy đoán dữ liệu.
+
 ---
 
 ## D. Cloud Cron-job (sao lưu định kỳ)

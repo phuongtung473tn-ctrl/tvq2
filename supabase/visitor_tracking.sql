@@ -111,3 +111,23 @@ $$;
 
 revoke all on function public.get_funnel_analytics() from public;
 grant execute on function public.get_funnel_analytics() to authenticated;
+
+create or replace function public.reset_funnel_analytics()
+returns void
+language plpgsql
+security definer
+set search_path = public
+as $$
+begin
+	if not public.is_funnel_admin() then
+		raise exception 'admin access required';
+	end if;
+	delete from public.visitor_sessions;
+	delete from public.leads;
+	insert into public.funnel_analytics (id, data, updated_at)
+	values (1, '{"visits":0,"leads":0,"bySource":{},"bySourceStats":{},"byVariant":{}}'::jsonb, now())
+	on conflict (id) do update set data = excluded.data, updated_at = excluded.updated_at;
+end;
+$$;
+revoke all on function public.reset_funnel_analytics() from public;
+grant execute on function public.reset_funnel_analytics() to authenticated;

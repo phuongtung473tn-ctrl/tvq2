@@ -71,6 +71,8 @@ export interface VisitorMetrics {
   submissionCountSameVisitor: number;
   deviceMemory: number | null;
   hardwareConcurrency: number | null;
+  batteryLevelPercent: number | null;
+  batteryCharging: boolean | null;
   sessionCounts: VisitorSessionCounts;
 }
 
@@ -113,6 +115,8 @@ export interface BehaviorData {
   network_flags: string[];
   device_memory: number | null;
   hardware_concurrency: number | null;
+  battery_level_percent: number | null;
+  battery_charging: boolean | null;
   client_ip: string;
   location_city: string;
   location_region: string;

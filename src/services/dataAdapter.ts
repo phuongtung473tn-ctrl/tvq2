@@ -1126,14 +1126,17 @@ export async function clearAnalytics(config?: SiteConfig): Promise<boolean> {
   if (!isBrowser()) return false;
   if (config?.admin.storageMode === "database") {
     try {
+      const env = configuredSupabase();
+      const url = env.url || config.admin.supabaseUrl;
+      const key = env.key || config.admin.supabaseAnonKey;
       const response = await fetch(
-        `${config.admin.supabaseUrl.replace(/\/$/, "")}/rest/v1/rpc/reset_funnel_analytics`,
+        `${url.replace(/\/$/, "")}/rest/v1/rpc/reset_funnel_analytics`,
         {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
-            apikey: config.admin.supabaseAnonKey,
-            Authorization: `Bearer ${bearer(config.admin.supabaseAnonKey)}`,
+            apikey: key,
+            Authorization: `Bearer ${bearer(key)}`,
           },
           body: "{}",
         },

@@ -86,6 +86,18 @@ $$;
 revoke all on function public.get_funnel_analytics() from public;
 grant execute on function public.get_funnel_analytics() to authenticated;
 
+create or replace function public.reset_funnel_analytics()
+returns void language plpgsql security definer set search_path = public as $$
+begin
+	if not public.is_funnel_admin() then raise exception 'admin access required'; end if;
+	delete from public.visitor_sessions;
+	delete from public.leads;
+	insert into public.funnel_analytics (id, data, updated_at) values (1, '{"visits":0,"leads":0,"bySource":{},"bySourceStats":{},"byVariant":{}}'::jsonb, now()) on conflict (id) do update set data = excluded.data, updated_at = excluded.updated_at;
+end;
+$$;
+revoke all on function public.reset_funnel_analytics() from public;
+grant execute on function public.reset_funnel_analytics() to authenticated;
+
 update public.funnel_configs set data = data #- '{admin,password}' where id = 1;
 
 create table if not exists public.admin_users (user_id uuid primary key references auth.users(id) on delete cascade, email text not null, role text not null default 'admin' check (role in ('admin', 'owner')), enabled boolean not null default true, created_at timestamptz not null default now());

@@ -1346,35 +1346,29 @@ function AnalyticsModal({ onClose }: ModalProps) {
   const [actionMessage, setActionMessage] = useState<string | null>(null);
   const [loadError, setLoadError] = useState<string | null>(null);
   const [loadingCloud, setLoadingCloud] = useState(false);
-  const analyticsRequest = useRef(0);
-  const reloadCloudAnalytics = useCallback(async () => {
-    if (!configReady) return;
-    const requestId = ++analyticsRequest.current;
-    setLoadingCloud(true);
-    const result = await loadCloudAnalytics(config);
-    if (requestId !== analyticsRequest.current) return;
-    if (result.data) {
-      setA(result.data);
-      setLoadError(null);
-    } else if (config.admin.storageMode === "database") {
-      setLoadError(result.error || "unknown_error");
-    }
-    setLoadingCloud(false);
-  }, [config, configReady]);
   useEffect(() => {
     if (!configReady) return;
+    if (config.admin.storageMode === "database") {
+      setLoadingCloud(true);
+      void loadCloudAnalytics(config).then((result) => {
+        if (result.data) {
+          setA(result.data);
+          setLoadError(null);
+        } else {
+          setLoadError(result.error || "unknown_error");
+        }
+        setLoadingCloud(false);
+      });
+    }
     const refresh = () => {
-      if (config.admin.storageMode === "database") {
-        void reloadCloudAnalytics();
-      } else {
+      if (config.admin.storageMode !== "database") {
         setA(loadAnalytics());
       }
     };
     if (config.admin.storageMode !== "database") setA(loadAnalytics());
-    void reloadCloudAnalytics();
     window.addEventListener(ANALYTICS_UPDATED_EVENT, refresh);
     return () => window.removeEventListener(ANALYTICS_UPDATED_EVENT, refresh);
-  }, [config, configReady, reloadCloudAnalytics]);
+  }, [config, configReady]);
   const cr =
     a && a.visits > 0 ? ((a.leads / a.visits) * 100).toFixed(1) : "0.0";
   return (
@@ -1394,19 +1388,29 @@ function AnalyticsModal({ onClose }: ModalProps) {
             if (
               window.confirm(
                 config.admin.storageMode === "database"
-                  ? "Xóa toàn bộ số liệu Analytics trên Supabase?"
+                  ? "Xóa lượt truy cập và lượt đăng ký test trên Supabase?"
                   : "Xóa toàn bộ số liệu Analytics trên thiết bị này?",
               )
-            )
+            ) {
+              const cleared = await clearAnalytics(config);
+              if (cleared)
+                setA({
+                  visits: 0,
+                  leads: 0,
+                  bySource: {},
+                  bySourceStats: {},
+                  byVariant: {},
+                });
               setActionMessage(
-                (await clearAnalytics(config))
-                  ? "Đã reset analytics trên Supabase."
+                cleared
+                  ? "Đã xóa và reset Analytics Supabase về 0."
                   : "Không thể reset analytics. Kiểm tra quyền Supabase.",
               );
+            }
           }}
           className="rounded-lg border border-red-200 px-3 py-1.5 text-[11px] font-bold text-red-600"
         >
-          Xóa số liệu test
+          Xóa dữ liệu Analytics cloud
         </button>
         {actionMessage && (
           <p className="mb-2 text-center text-[11px] font-semibold text-sky-700">
@@ -1441,16 +1445,6 @@ function AnalyticsModal({ onClose }: ModalProps) {
             </>
           )}
         </p>
-      )}
-      {config.admin.storageMode === "database" && (
-        <button
-          type="button"
-          onClick={() => void reloadCloudAnalytics()}
-          disabled={loadingCloud}
-          className="mb-3 rounded-lg border border-neutral-300 px-3 py-1.5 text-[11px] font-bold text-neutral-700 disabled:opacity-50"
-        >
-          {loadingCloud ? "Đang tải Analytics..." : "Tải lại Analytics cloud"}
-        </button>
       )}
       <div className="grid grid-cols-3 gap-2">
         <Stat

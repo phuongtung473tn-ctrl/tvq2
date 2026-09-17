@@ -315,7 +315,28 @@ function generateSaleAdvice(
     );
   }
 
-  return advice.join("\n");
+  return formatWebhookText(advice.join("\n"));
+}
+
+function formatWebhookText(value: string): string {
+  return value
+    .replaceAll("[TIP]", "💡")
+    .replaceAll("[=>]", "➡️")
+    .replaceAll("[WARN]", "⚠️")
+    .replaceAll("[REVIEW]", "🔎")
+    .replaceAll("[INFO]", "ℹ️")
+    .replaceAll("[SLOW]", "⏳")
+    .replaceAll("[GEO]", "📍")
+    .replaceAll("[NIGHT]", "🌙")
+    .replaceAll("[MOUSE]", "🖱️")
+    .replaceAll("[FORM]", "📝")
+    .replaceAll("[SCROLL]", "📜")
+    .replaceAll("[VISIT]", "👣")
+    .replaceAll("[SWITCH]", "🔁")
+    .replaceAll("[COPY]", "📋")
+    .replaceAll("[UPDOWN]", "↕️")
+    .replaceAll("[BOT]", "🤖")
+    .replaceAll("[APP]", "📲");
 }
 
 function generateBehaviorSummary(data: BehaviorData): string {
@@ -367,7 +388,7 @@ function generateBehaviorSummary(data: BehaviorData): string {
     parts.push("[BOT] Phát hiện trình duyệt tự động (bot)");
   if (data.is_in_app_browser)
     parts.push("[APP] Mở trang trong app Facebook/TikTok/Zalo");
-  return parts.join(". ");
+  return formatWebhookText(parts.map((part) => `• ${part}`).join("\n"));
 }
 
 export function joinParts(parts: Array<string | undefined>): string {
@@ -387,16 +408,21 @@ function generateDeviceTechInfo(data: BehaviorData): string {
     data.device_manufacturer,
     data.device_model_name,
   ]);
+  const battery =
+    data.battery_level_percent != null
+      ? `🔋 Pin ${data.battery_level_percent}%${data.battery_charging ? " · đang sạc" : ""}`
+      : "🔋 Pin không khả dụng";
   return [
-    deviceName || "Thiết bị chưa nhận diện",
-    os || "Hệ điều hành chưa rõ",
-    browser || "Trình duyệt chưa rõ",
-    data.is_in_app_browser ? "Mở trong app (FB/TikTok/Zalo)" : "",
-    data.network_label,
-    hwInfo,
+    `📱 ${deviceName || "Thiết bị chưa nhận diện"}`,
+    `🧩 ${os || "Hệ điều hành chưa rõ"}`,
+    `🌐 ${browser || "Trình duyệt chưa rõ"}`,
+    data.is_in_app_browser ? "📲 Mở trong app (FB/TikTok/Zalo)" : "",
+    `📡 ${data.network_label}`,
+    `💻 ${hwInfo}`,
+    battery,
   ]
     .filter(Boolean)
-    .join(" | ");
+    .join("\n");
 }
 
 const PLATFORM_LABELS: Record<string, string> = {
@@ -438,7 +464,7 @@ export function generateTrafficAdsSource(
   );
 
   if (!hasCampaignData && source.toLowerCase() === "direct") {
-    return "Nguồn: Truy cập trực tiếp (không qua chiến dịch quảng cáo)";
+    return "🎯 Nguồn: Truy cập trực tiếp (không qua chiến dịch quảng cáo)";
   }
 
   const parts = [
@@ -450,7 +476,9 @@ export function generateTrafficAdsSource(
     data.ttclid && `Mã TikTok: ${data.ttclid}`,
   ].filter(Boolean);
 
-  return parts.length > 0 ? parts.join(" · ") : "Nguồn: Truy cập trực tiếp";
+  return parts.length > 0
+    ? formatWebhookText(`🎯 ${parts.map((part) => `• ${part}`).join("\n")}`)
+    : "🎯 Nguồn: Truy cập trực tiếp";
 }
 
 export function buildVisitorBehaviorPayload(
