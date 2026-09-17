@@ -34,7 +34,7 @@ export function AdminLoginPage() {
     }
     setError(
       ok.reason === "email_not_confirmed"
-        ? "Email Supabase chưa được xác nhận. Hãy xác nhận email hoặc tắt Confirm email trong Supabase Auth rồi thử lại."
+        ? "Tài khoản Supabase này vẫn chưa được xác nhận. Tắt Confirm email không tự xác nhận user đã tạo trước đó; hãy bấm Confirm email tại Authentication > Users rồi thử lại."
         : ok.reason === "email_provider_disabled"
           ? "Supabase đang tắt đăng nhập bằng Email. Vào Authentication > Providers > Email và bật Email provider, sau đó thử lại."
           : ok.reason === "invalid_credentials"
