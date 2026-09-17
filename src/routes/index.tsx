@@ -780,7 +780,10 @@ function Landing() {
       {/* FAQ — nằm cuối cùng, gần Footer nhất */}
       <section
         id="faq"
-        style={{ order: 98 }}
+        style={{
+          order: 98,
+          display: section("faq")?.enabled === false ? "none" : undefined,
+        }}
         className="mx-auto max-w-3xl px-4 py-16 sm:py-20"
       >
         <h2 className="text-center text-2xl font-extrabold sm:text-3xl lg:text-4xl">
