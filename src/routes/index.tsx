@@ -706,45 +706,6 @@ function Landing() {
         </div>
       </section>
 
-      {/* FAQ */}
-      <section
-        id="faq"
-        style={sectionStyle("faq")}
-        className="mx-auto max-w-3xl px-4 py-16 sm:py-20"
-      >
-        <h2 className="text-center text-2xl font-extrabold sm:text-3xl lg:text-4xl">
-          {content.faqHeading}
-        </h2>
-        <div className="mt-8 space-y-3">
-          {faqs.map((f) => (
-            <details
-              key={f.q}
-              onToggle={(e) => {
-                if ((e.currentTarget as HTMLDetailsElement).open)
-                  markFaqClick(f.slug);
-              }}
-              className="group rounded-2xl border border-border bg-card p-5 transition hover:border-primary/50"
-            >
-              <summary className="cursor-pointer break-words text-base font-bold leading-snug marker:hidden">
-                <span className="mr-2 text-primary">?</span>
-                {f.q}
-              </summary>
-              <p className="mt-3 whitespace-pre-line break-words text-sm leading-relaxed text-muted-foreground">
-                {f.a}
-              </p>
-            </details>
-          ))}
-        </div>
-        <div className="mt-8 text-center">
-          <a
-            href="#dang-ky-cuoi"
-            className="inline-flex w-full max-w-md items-center justify-center rounded-xl bg-primary px-6 py-3 text-center text-sm font-extrabold text-primary-foreground sm:w-auto"
-          >
-            Nhận tư vấn điều kiện và lộ trình phù hợp
-          </a>
-        </div>
-      </section>
-
       {/* Final CTA */}
       <section
         style={sectionStyle("finalCta")}
@@ -773,7 +734,7 @@ function Landing() {
       {/* Graduation proof — ngay trên phần ưu đãi */}
       {content.graduationImageUrls.length > 0 && (
         <section
-          style={{ order: 97 }}
+          style={{ order: 96 }}
           className="border-y border-border bg-muted/40 py-16 sm:py-20"
         >
           <div className="mx-auto max-w-6xl px-4">
@@ -811,10 +772,49 @@ function Landing() {
       )}
 
       {offerSection && (
-        <div style={{ order: 98 }}>
+        <div style={{ order: 97 }}>
           <ContentSection section={offerSection} />
         </div>
       )}
+
+      {/* FAQ — nằm cuối cùng, gần Footer nhất */}
+      <section
+        id="faq"
+        style={{ order: 98 }}
+        className="mx-auto max-w-3xl px-4 py-16 sm:py-20"
+      >
+        <h2 className="text-center text-2xl font-extrabold sm:text-3xl lg:text-4xl">
+          {content.faqHeading}
+        </h2>
+        <div className="mt-8 space-y-3">
+          {faqs.map((f) => (
+            <details
+              key={f.q}
+              onToggle={(e) => {
+                if ((e.currentTarget as HTMLDetailsElement).open)
+                  markFaqClick(f.slug);
+              }}
+              className="group rounded-2xl border border-border bg-card p-5 transition hover:border-primary/50"
+            >
+              <summary className="cursor-pointer break-words text-base font-bold leading-snug marker:hidden">
+                <span className="mr-2 text-primary">?</span>
+                {f.q}
+              </summary>
+              <p className="mt-3 whitespace-pre-line break-words text-sm leading-relaxed text-muted-foreground">
+                {f.a}
+              </p>
+            </details>
+          ))}
+        </div>
+        <div className="mt-8 text-center">
+          <a
+            href="#dang-ky-cuoi"
+            className="inline-flex w-full max-w-md items-center justify-center rounded-xl bg-primary px-6 py-3 text-center text-sm font-extrabold text-primary-foreground sm:w-auto"
+          >
+            Nhận tư vấn điều kiện và lộ trình phù hợp
+          </a>
+        </div>
+      </section>
 
       {/* Footer */}
       <footer
