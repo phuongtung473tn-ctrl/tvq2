@@ -770,7 +770,11 @@ function Landing() {
         </div>
       ))}
 
-      {offerSection && <ContentSection section={offerSection} />}
+      {offerSection && (
+        <div style={{ order: 98 }}>
+          <ContentSection section={offerSection} />
+        </div>
+      )}
 
       {/* Footer */}
       <footer
