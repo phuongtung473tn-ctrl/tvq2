@@ -943,24 +943,36 @@ async function syncAnalyticsToSupabase(
 export async function loadCloudAnalytics(
   config: SiteConfig,
 ): Promise<AnalyticsState | null> {
+  const env = import.meta.env as Record<string, string | undefined>;
+  const supabaseUrl =
+    config.admin.supabaseUrl.trim() || env["VITE_SUPABASE_URL"]?.trim() || "";
+  const supabaseAnonKey =
+    config.admin.supabaseAnonKey.trim() ||
+    env["VITE_SUPABASE_ANON_KEY"]?.trim() ||
+    "";
   if (
     !isBrowser() ||
     config.admin.storageMode !== "database" ||
-    !config.admin.supabaseUrl ||
-    !config.admin.supabaseAnonKey
+    !supabaseUrl ||
+    !supabaseAnonKey
   ) {
     console.warn("Analytics cloud skipped: Supabase config is not ready");
     return null;
   }
   try {
-    if (!getSupabaseAccessToken()) {
+    let accessToken = getSupabaseAccessToken();
+    if (!accessToken) {
+      await new Promise((resolve) => window.setTimeout(resolve, 150));
+      accessToken = getSupabaseAccessToken();
+    }
+    if (!accessToken) {
       console.warn("Analytics cloud skipped: Admin access token is missing");
       return null;
     }
-    const base = config.admin.supabaseUrl.replace(/\/$/, "");
+    const base = supabaseUrl.replace(/\/$/, "");
     const headers = {
-      apikey: config.admin.supabaseAnonKey,
-      Authorization: `Bearer ${bearer(config.admin.supabaseAnonKey)}`,
+      apikey: supabaseAnonKey,
+      Authorization: `Bearer ${accessToken}`,
     };
     const response = await fetch(`${base}/rest/v1/rpc/get_funnel_analytics`, {
       method: "POST",
