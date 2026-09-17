@@ -146,21 +146,41 @@ function emit() {
 
 function readJSON<T>(key: string, fallback: T): T {
   if (!isBrowser()) return fallback;
+  try {
+    const raw = window.localStorage.getItem(key);
+    if (raw) return JSON.parse(raw) as T;
+  } catch {
+    /* Fall back to in-memory storage when browser storage is blocked. */
+  }
   return (runtimeStorage.get(key) as T | undefined) ?? fallback;
 }
 
 function writeJSON(key: string, value: unknown) {
   if (!isBrowser()) return;
   runtimeStorage.set(key, value);
+  try {
+    window.localStorage.setItem(key, JSON.stringify(value));
+  } catch {
+    /* Private/in-app browsers may block localStorage. */
+  }
 }
 
 function readSessionMarker() {
   if (!isBrowser()) return "";
-  return String(runtimeStorage.get(SESSION_MARKER_KEY) || "");
+  try {
+    return window.localStorage.getItem(SESSION_MARKER_KEY) || "";
+  } catch {
+    return String(runtimeStorage.get(SESSION_MARKER_KEY) || "");
+  }
 }
 
 function writeSessionMarker(value: string) {
   if (!isBrowser()) return;
+  try {
+    window.localStorage.setItem(SESSION_MARKER_KEY, value);
+  } catch {
+    /* Private/in-app browsers may block localStorage. */
+  }
   runtimeStorage.set(SESSION_MARKER_KEY, value);
 }
 
@@ -603,7 +623,12 @@ async function fetchRemoteSessionCounts(
           ]),
         },
       );
-      if (!sessionResponse.ok && sessionResponse.status !== 409) return;
+      if (!sessionResponse.ok && sessionResponse.status !== 409) {
+        console.warn(
+          `visitor_sessions insert failed [${sessionResponse.status}]`,
+        );
+        return;
+      }
     }
 
     const [todayResponse, monthResponse] = await Promise.all([
@@ -617,7 +642,12 @@ async function fetchRemoteSessionCounts(
       ),
     ]);
 
-    if (!todayResponse.ok || !monthResponse.ok) return;
+    if (!todayResponse.ok || !monthResponse.ok) {
+      console.warn(
+        `visitor_sessions count failed [${todayResponse.status}/${monthResponse.status}]`,
+      );
+      return;
+    }
     const [todayRows, monthRows] = (await Promise.all([
       todayResponse.json(),
       monthResponse.json(),
