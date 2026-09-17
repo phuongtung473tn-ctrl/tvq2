@@ -11,6 +11,7 @@ import {
   clearSupabaseAccessToken,
   getSupabaseAccessToken,
   signInWithSupabase,
+  type SupabaseSignInResult,
 } from "@/lib/supabase-auth";
 
 export type AdminModalKey =
@@ -55,7 +56,7 @@ interface AdminContextValue {
     supabaseUrl?: string,
     supabaseAnonKey?: string,
     supabaseAdminEmail?: string,
-  ) => Promise<boolean>;
+  ) => Promise<SupabaseSignInResult>;
   logout: () => void;
   activeModal: AdminModalKey | null;
   openModal: (key: AdminModalKey) => void;
@@ -121,14 +122,14 @@ export function AdminProvider({ children }: { children: ReactNode }) {
         email,
         password,
       );
-      if (!cloudLogin) return false;
+      if (!cloudLogin.ok) return cloudLogin;
       setAuthed(true);
       try {
         window.sessionStorage.setItem(AUTH_KEY, "1");
       } catch {
         /* ignore */
       }
-      return true;
+      return { ok: true };
     },
     [],
   );

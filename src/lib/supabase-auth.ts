@@ -1,5 +1,19 @@
 const ACCESS_TOKEN_KEY = "funnel_supabase_access_token_v1";
 
+export type SupabaseSignInResult =
+  | { ok: true }
+  | {
+      ok: false;
+      reason:
+        | "invalid_credentials"
+        | "email_not_confirmed"
+        | "auth_failed"
+        | "user_lookup_failed"
+        | "admin_lookup_failed"
+        | "not_admin"
+        | "network_error";
+    };
+
 function tokenIsExpired(token: string): boolean {
   try {
     const payload = token.split(".")[1];
@@ -56,8 +70,9 @@ export async function signInWithSupabase(
   anonKey: string,
   email: string,
   password: string,
-): Promise<boolean> {
-  if (!url || !anonKey || !email || !password || !isBrowser()) return false;
+): Promise<SupabaseSignInResult> {
+  if (!url || !anonKey || !email || !password || !isBrowser())
+    return { ok: false, reason: "auth_failed" };
   try {
     const response = await fetch(
       `${url.replace(/\/$/, "")}/auth/v1/token?grant_type=password`,
@@ -70,13 +85,29 @@ export async function signInWithSupabase(
         body: JSON.stringify({ email, password }),
       },
     );
-    if (!response.ok) return false;
+    if (!response.ok) {
+      const error = (await response.json().catch(() => null)) as {
+        error_code?: unknown;
+        error?: unknown;
+      } | null;
+      if (
+        error?.error_code === "email_not_confirmed" ||
+        error?.error === "email_not_confirmed"
+      )
+        return { ok: false, reason: "email_not_confirmed" };
+      if (
+        error?.error_code === "invalid_credentials" ||
+        error?.error === "invalid_credentials"
+      )
+        return { ok: false, reason: "invalid_credentials" };
+      return { ok: false, reason: "auth_failed" };
+    }
     const payload = (await response.json()) as {
       access_token?: unknown;
       user?: { id?: unknown };
     };
     if (typeof payload.access_token !== "string" || !payload.access_token) {
-      return false;
+      return { ok: false, reason: "auth_failed" };
     }
     const userResponse = await fetch(`${url.replace(/\/$/, "")}/auth/v1/user`, {
       headers: {
@@ -84,9 +115,10 @@ export async function signInWithSupabase(
         Authorization: `Bearer ${payload.access_token}`,
       },
     });
-    if (!userResponse.ok) return false;
+    if (!userResponse.ok) return { ok: false, reason: "user_lookup_failed" };
     const user = (await userResponse.json()) as { id?: unknown };
-    if (typeof user.id !== "string" || !user.id) return false;
+    if (typeof user.id !== "string" || !user.id)
+      return { ok: false, reason: "user_lookup_failed" };
     const adminResponse = await fetch(
       `${url.replace(/\/$/, "")}/rest/v1/admin_users?user_id=eq.${encodeURIComponent(user.id)}&enabled=eq.true&select=user_id&limit=1`,
       {
@@ -96,12 +128,13 @@ export async function signInWithSupabase(
         },
       },
     );
-    if (!adminResponse.ok) return false;
+    if (!adminResponse.ok) return { ok: false, reason: "admin_lookup_failed" };
     const admins = (await adminResponse.json()) as unknown[];
-    if (!Array.isArray(admins) || admins.length === 0) return false;
+    if (!Array.isArray(admins) || admins.length === 0)
+      return { ok: false, reason: "not_admin" };
     window.sessionStorage.setItem(ACCESS_TOKEN_KEY, payload.access_token);
-    return true;
+    return { ok: true };
   } catch {
-    return false;
+    return { ok: false, reason: "network_error" };
   }
 }
