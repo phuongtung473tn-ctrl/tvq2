@@ -1340,12 +1340,13 @@ function WebhookModal({ onClose }: ModalProps) {
 
 /* ------------------------------ ANALYTICS --------------------------------- */
 function AnalyticsModal({ onClose }: ModalProps) {
-  const { config } = useSiteConfig();
+  const { config, ready: configReady } = useSiteConfig();
   const [a, setA] = useState<AnalyticsState | null>(null);
   const [actionMessage, setActionMessage] = useState<string | null>(null);
   const [loadError, setLoadError] = useState(false);
   const [loadingCloud, setLoadingCloud] = useState(false);
   const reloadCloudAnalytics = useCallback(async () => {
+    if (!configReady) return;
     setLoadingCloud(true);
     const cloud = await loadCloudAnalytics(config);
     if (cloud) {
@@ -1355,8 +1356,9 @@ function AnalyticsModal({ onClose }: ModalProps) {
       setLoadError(true);
     }
     setLoadingCloud(false);
-  }, [config]);
+  }, [config, configReady]);
   useEffect(() => {
+    if (!configReady) return;
     const refresh = () => {
       if (config.admin.storageMode === "database") {
         void reloadCloudAnalytics();
@@ -1368,7 +1370,7 @@ function AnalyticsModal({ onClose }: ModalProps) {
     void reloadCloudAnalytics();
     window.addEventListener(ANALYTICS_UPDATED_EVENT, refresh);
     return () => window.removeEventListener(ANALYTICS_UPDATED_EVENT, refresh);
-  }, [config, reloadCloudAnalytics]);
+  }, [config, configReady, reloadCloudAnalytics]);
   const cr =
     a && a.visits > 0 ? ((a.leads / a.visits) * 100).toFixed(1) : "0.0";
   return (
@@ -1427,13 +1429,20 @@ function AnalyticsModal({ onClose }: ModalProps) {
         </button>
       )}
       <div className="grid grid-cols-3 gap-2">
-        <Stat label="Lượt truy cập" value={a?.visits ?? 0} />
+        <Stat
+          label="Lượt truy cập"
+          value={a ? a.visits : loadingCloud ? "..." : "--"}
+        />
         <Stat
           label="Lượt đăng ký"
-          value={a?.leads ?? 0}
+          value={a ? a.leads : loadingCloud ? "..." : "--"}
           tone="text-emerald-600"
         />
-        <Stat label="Tỷ lệ CR" value={`${cr}%`} tone="text-red-600" />
+        <Stat
+          label="Tỷ lệ CR"
+          value={a ? `${cr}%` : "--"}
+          tone="text-red-600"
+        />
       </div>
       <p className="mb-2 mt-4 text-xs font-semibold text-neutral-700">
         Nguồn traffic (UTM)

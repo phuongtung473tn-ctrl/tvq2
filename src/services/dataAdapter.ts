@@ -949,10 +949,14 @@ export async function loadCloudAnalytics(
     !config.admin.supabaseUrl ||
     !config.admin.supabaseAnonKey
   ) {
+    console.warn("Analytics cloud skipped: Supabase config is not ready");
     return null;
   }
   try {
-    if (!getSupabaseAccessToken()) return null;
+    if (!getSupabaseAccessToken()) {
+      console.warn("Analytics cloud skipped: Admin access token is missing");
+      return null;
+    }
     const base = config.admin.supabaseUrl.replace(/\/$/, "");
     const headers = {
       apikey: config.admin.supabaseAnonKey,
@@ -963,9 +967,18 @@ export async function loadCloudAnalytics(
       headers,
       body: "{}",
     });
-    if (!response.ok) return null;
+    if (!response.ok) {
+      console.warn(
+        `Analytics cloud RPC failed [${response.status}]`,
+        await response.text(),
+      );
+      return null;
+    }
     const rows = (await response.json()) as Array<{ data?: unknown }>;
-    if (!isRecord(rows[0]?.data)) return null;
+    if (!isRecord(rows[0]?.data)) {
+      console.warn("Analytics cloud RPC returned an invalid payload");
+      return null;
+    }
     cloudAnalyticsState = normalizeAnalytics(
       rows[0].data as Partial<AnalyticsState>,
     );
