@@ -1,5 +1,6 @@
 import type { SiteConfig } from "@/config/site-config";
 import { ScarcityBar } from "@/components/ScarcityBar";
+import { CalendarDays, Gift, Sparkles } from "lucide-react";
 
 type ContentSectionData = SiteConfig["landing"]["sectionsArray"][number];
 
@@ -14,6 +15,11 @@ export function ContentSection({ section }: { section: ContentSectionData }) {
       ?.split("\n")
       .map((line) => line.trim())
       .filter(Boolean) || [];
+  const offerIntro = bodyLines[0] || "Đăng ký sớm để nhận chính sách hỗ trợ.";
+  const offerValue = bodyLines.find((line) => line.includes("2.000.000"));
+  const offerTerms = bodyLines.filter(
+    (line) => line !== offerIntro && line !== offerValue,
+  );
 
   return (
     <section
@@ -50,9 +56,19 @@ export function ContentSection({ section }: { section: ContentSectionData }) {
           />
         )
       )}
+      {variant === "offer" && (
+        <div className="flex flex-wrap items-center gap-2 text-xs font-bold uppercase tracking-wide text-gold">
+          <span className="inline-flex items-center gap-1 rounded-full border border-gold/50 bg-gold/10 px-3 py-1.5">
+            <Sparkles className="h-3.5 w-3.5" /> Cơ hội trong tháng
+          </span>
+          <span className="inline-flex items-center gap-1 text-primary-foreground/80">
+            <CalendarDays className="h-3.5 w-3.5" /> Hạn 28/09/2026
+          </span>
+        </div>
+      )}
       <h2
         style={{ color: section.content?.accentColor || undefined }}
-        className={`text-2xl font-extrabold sm:text-3xl ${
+        className={`mt-3 text-2xl font-extrabold sm:text-3xl ${
           variant === "offer" ? "text-primary-foreground" : ""
         }`}
       >
@@ -68,8 +84,31 @@ export function ContentSection({ section }: { section: ContentSectionData }) {
           </p>
         </details>
       ) : variant === "offer" ? (
-        <div className="mt-4 max-w-3xl whitespace-pre-line text-sm leading-relaxed text-primary-foreground/90 sm:text-base">
-          {section.content?.body}
+        <div className="mt-5 grid gap-4 lg:grid-cols-[minmax(0,1fr)_18rem] lg:items-center">
+          <div className="min-w-0">
+            <p className="text-sm leading-relaxed text-primary-foreground/90 sm:text-base">
+              {offerIntro}
+            </p>
+            <div className="mt-4 flex items-start gap-3 border-l-2 border-gold pl-3 text-sm leading-relaxed text-primary-foreground/80">
+              <Gift className="mt-0.5 h-5 w-5 shrink-0 text-gold" />
+              <div className="space-y-2">
+                {offerTerms.map((term) => (
+                  <p key={term}>{term}</p>
+                ))}
+              </div>
+            </div>
+          </div>
+          <div className="border border-gold/60 bg-gold px-5 py-5 text-center text-gold-foreground">
+            <p className="text-xs font-bold uppercase tracking-wide">
+              Ưu đãi dành riêng
+            </p>
+            <p className="mt-2 text-2xl font-black sm:text-3xl">
+              {offerValue?.replace("🎁 ", "") || "2.000.000đ"}
+            </p>
+            <p className="mt-2 text-xs leading-relaxed">
+              Đăng ký qua website trước hạn áp dụng
+            </p>
+          </div>
         </div>
       ) : variant === "pricing" || variant === "grid" ? (
         <ul className="mt-4 grid gap-2 sm:grid-cols-2">
@@ -107,9 +146,9 @@ export function ContentSection({ section }: { section: ContentSectionData }) {
       {section.content?.buttonLabel && (
         <a
           href={section.content.buttonHref || "#dang-ky"}
-          className={`mt-6 inline-flex max-w-full rounded-xl px-5 py-3 text-center font-bold ${
+          className={`mt-6 inline-flex w-full max-w-md items-center justify-center rounded-xl px-5 py-3 text-center font-bold sm:w-auto ${
             variant === "offer"
-              ? "bg-gold text-gold-foreground"
+              ? "cta-pulse bg-gold text-gold-foreground"
               : "bg-primary text-primary-foreground"
           }`}
         >
