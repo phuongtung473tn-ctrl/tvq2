@@ -950,10 +950,10 @@ export async function loadCloudAnalytics(
 ): Promise<CloudAnalyticsResult> {
   const env = import.meta.env as Record<string, string | undefined>;
   const supabaseUrl =
-    config.admin.supabaseUrl.trim() || env["VITE_SUPABASE_URL"]?.trim() || "";
+    env["VITE_SUPABASE_URL"]?.trim() || config.admin.supabaseUrl.trim() || "";
   const supabaseAnonKey =
-    config.admin.supabaseAnonKey.trim() ||
     env["VITE_SUPABASE_ANON_KEY"]?.trim() ||
+    config.admin.supabaseAnonKey.trim() ||
     "";
   if (
     !isBrowser() ||
@@ -987,7 +987,7 @@ export async function loadCloudAnalytics(
     if (!response.ok) {
       const detail = await response.text();
       console.warn(`Analytics cloud RPC failed [${response.status}]`, detail);
-      return { data: null, error: `rpc_${response.status}` };
+      return { data: null, error: `rpc_${response.status}@${base}` };
     }
     const rows = (await response.json()) as Array<{ data?: unknown }>;
     if (!isRecord(rows[0]?.data)) {
