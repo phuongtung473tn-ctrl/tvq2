@@ -643,6 +643,46 @@ function Landing() {
         </Reveal>
       </section>
 
+      {/* Graduation proof */}
+      {content.graduationImageUrls.length > 0 && (
+        <section
+          style={sectionStyle("graduation")}
+          className="border-y border-border bg-muted/40 py-16 sm:py-20"
+        >
+          <div className="mx-auto max-w-6xl px-4">
+            <div className="mx-auto max-w-3xl text-center">
+              <span className="inline-flex items-center gap-2 rounded-full bg-gold px-3 py-1.5 text-xs font-extrabold uppercase tracking-wide text-gold-foreground">
+                <GraduationCap className="h-3.5 w-3.5" />
+                {content.graduationBadge}
+              </span>
+              <h2 className="mt-4 text-2xl font-extrabold sm:text-3xl lg:text-4xl">
+                {content.graduationHeading}
+              </h2>
+              <p className="mt-4 whitespace-pre-line text-left text-sm leading-relaxed text-muted-foreground sm:text-base">
+                {content.graduationDescription}
+              </p>
+            </div>
+            <Reveal>
+              <div className="mt-9 grid grid-cols-2 gap-2.5 sm:grid-cols-3 sm:gap-3 lg:grid-cols-5">
+                {content.graduationImageUrls.map((src, i) => (
+                  <div
+                    key={`${src}-${i}`}
+                    className="group aspect-square overflow-hidden rounded-xl border border-border bg-card shadow-[var(--shadow-card)]"
+                  >
+                    <img
+                      src={src}
+                      alt={`Minh chứng lễ tốt nghiệp ${i + 1}`}
+                      loading="lazy"
+                      className="h-full w-full object-cover transition duration-500 group-hover:scale-110"
+                    />
+                  </div>
+                ))}
+              </div>
+            </Reveal>
+          </div>
+        </section>
+      )}
+
       {/* Testimonials */}
       <section
         style={sectionStyle("testimonials")}

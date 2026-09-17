@@ -2510,8 +2510,10 @@ function LandingEditorModal({ onClose }: ModalProps) {
   const heroImageInputRef = useRef<HTMLInputElement>(null);
   const heroSliderInputRef = useRef<HTMLInputElement>(null);
   const galleryInputRef = useRef<HTMLInputElement>(null);
+  const graduationInputRef = useRef<HTMLInputElement>(null);
   const [logoError, setLogoError] = useState("");
   const [heroMediaError, setHeroMediaError] = useState("");
+  const [graduationError, setGraduationError] = useState("");
   const [templateType, setTemplateType] = useState("promo");
   const updateLines = (
     key: "heroTrustItems" | "pains" | "galleryCaptions",
@@ -2790,6 +2792,43 @@ function LandingEditorModal({ onClose }: ModalProps) {
           ...images.map(() => "Ảnh thực tế chương trình"),
         ];
       });
+    });
+  }
+  const GRADUATION_IMAGE_LIMIT = 25;
+  function uploadGraduationImages(files: FileList) {
+    setGraduationError("");
+    const selected = Array.from(files).filter(
+      (file) =>
+        /^image\/(png|jpeg|webp)$/.test(file.type) &&
+        file.size <= 2 * 1024 * 1024,
+    );
+    if (selected.length === 0) {
+      setGraduationError("Vui lòng chọn PNG/JPG/WebP tối đa 2MB mỗi ảnh.");
+      return;
+    }
+    const remaining =
+      GRADUATION_IMAGE_LIMIT - content.graduationImageUrls.length;
+    if (remaining <= 0) {
+      setGraduationError(
+        `Đã đạt giới hạn ${GRADUATION_IMAGE_LIMIT} ảnh. Hãy xóa bớt ảnh cũ trước khi thêm mới.`,
+      );
+      return;
+    }
+    Promise.all(
+      selected.slice(0, remaining).map((file) => readImageDataUrl(file)),
+    ).then((images) => {
+      update((draft) => {
+        draft.landing.graduationImageUrls = [
+          ...draft.landing.graduationImageUrls,
+          ...images,
+        ];
+      });
+    });
+  }
+  function removeGraduationImage(index: number) {
+    update((draft) => {
+      draft.landing.graduationImageUrls =
+        draft.landing.graduationImageUrls.filter((_, i) => i !== index);
     });
   }
   function updateSections(nextSections: typeof content.sectionsArray) {
@@ -3640,6 +3679,87 @@ function LandingEditorModal({ onClose }: ModalProps) {
         >
           Chọn nhiều ảnh
         </button>
+      </div>
+      <div className="mb-3 rounded-xl border border-neutral-200 p-3 dark:border-white/10">
+        <p className="text-xs font-bold">
+          Minh chứng tốt nghiệp (Trust section)
+        </p>
+        <p className="mt-1 text-[11px] text-neutral-400">
+          Hiển thị sau Gallery để tăng độ tin cậy. Tối đa{" "}
+          {GRADUATION_IMAGE_LIMIT} ảnh, mỗi ảnh PNG/JPG/WebP tối đa 2MB.
+        </p>
+        <Field label="Nhãn (badge)">
+          <TextInput
+            value={content.graduationBadge}
+            onChange={(e) =>
+              update((d) => (d.landing.graduationBadge = e.target.value))
+            }
+          />
+        </Field>
+        <Field label="Tiêu đề">
+          <TextInput
+            value={content.graduationHeading}
+            onChange={(e) =>
+              update((d) => (d.landing.graduationHeading = e.target.value))
+            }
+          />
+        </Field>
+        <Field label="Nội dung">
+          <TextArea
+            value={content.graduationDescription}
+            onChange={(e) =>
+              update((d) => (d.landing.graduationDescription = e.target.value))
+            }
+          />
+        </Field>
+        <input
+          ref={graduationInputRef}
+          type="file"
+          multiple
+          accept="image/png,image/jpeg,image/webp"
+          className="hidden"
+          onChange={(event) => {
+            if (event.target.files) uploadGraduationImages(event.target.files);
+            event.target.value = "";
+          }}
+        />
+        <button
+          type="button"
+          onClick={() => graduationInputRef.current?.click()}
+          className="mt-2 rounded-lg bg-neutral-900 px-3 py-2 text-xs font-bold text-white"
+        >
+          Tải ảnh minh chứng ({content.graduationImageUrls.length}/
+          {GRADUATION_IMAGE_LIMIT})
+        </button>
+        {graduationError && (
+          <p className="mt-2 text-[11px] font-semibold text-red-600">
+            {graduationError}
+          </p>
+        )}
+        {content.graduationImageUrls.length > 0 && (
+          <div className="mt-3 grid grid-cols-4 gap-2 sm:grid-cols-6">
+            {content.graduationImageUrls.map((src, i) => (
+              <div
+                key={`${src}-${i}`}
+                className="group relative aspect-square overflow-hidden rounded-lg border border-neutral-200 dark:border-white/10"
+              >
+                <img
+                  src={src}
+                  alt={`Ảnh minh chứng ${i + 1}`}
+                  className="h-full w-full object-cover"
+                />
+                <button
+                  type="button"
+                  onClick={() => removeGraduationImage(i)}
+                  aria-label="Xóa ảnh"
+                  className="absolute right-1 top-1 rounded-full bg-black/70 px-1.5 py-0.5 text-[10px] font-bold text-white opacity-0 transition group-hover:opacity-100"
+                >
+                  ✕
+                </button>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
       <Field label="URL ảnh chuyên gia (JSON array)">
         <TextArea

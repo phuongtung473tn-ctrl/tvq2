@@ -210,6 +210,10 @@ export interface LandingConfig {
   galleryHeading: string;
   galleryDescription: string;
   galleryCaptions: string[];
+  graduationBadge: string;
+  graduationHeading: string;
+  graduationDescription: string;
+  graduationImageUrls: string[];
   testimonialsHeading: string;
   testimonials: {
     name: string;
@@ -384,26 +388,33 @@ export const DEFAULT_CONFIG: SiteConfig = {
         order: 6,
       },
       {
+        id: "graduation",
+        type: "graduation",
+        label: "Minh chứng tốt nghiệp",
+        enabled: true,
+        order: 7,
+      },
+      {
         id: "testimonials",
         type: "testimonials",
         label: "Testimonials",
         enabled: true,
-        order: 7,
+        order: 8,
       },
       {
         id: "steps",
         type: "steps",
         label: "Lộ trình",
         enabled: true,
-        order: 8,
+        order: 9,
       },
-      { id: "faq", type: "faq", label: "FAQ", enabled: true, order: 9 },
+      { id: "faq", type: "faq", label: "FAQ", enabled: true, order: 10 },
       {
         id: "finalCta",
         type: "finalCta",
         label: "CTA cuối",
         enabled: true,
-        order: 10,
+        order: 11,
       },
     ],
     brandName: "Trung tâm Hướng nghiệp & Phát triển Sự nghiệp Quốc tế",
@@ -524,6 +535,12 @@ export const DEFAULT_CONFIG: SiteConfig = {
       "Phòng ký túc xá trong trường — miễn 100% phí ở",
       "Học viên lên đường nhập học kỳ tháng 9",
     ],
+    graduationBadge: "Khóa 2023-2026 Tốt nghiệp",
+    graduationHeading:
+      "Lễ tốt nghiệp chính quy tại Trường Đại học Công nghệ Điện tử Quế Lâm",
+    graduationDescription:
+      "🎓 Ngày 25/6/2026, Trường Đại học Công nghệ Điện tử Quế Lâm – Cơ sở Bắc Hải đã long trọng tổ chức Lễ tốt nghiệp và trao bằng cho sinh viên khóa 2026 với sự tham dự của Ban Giám hiệu nhà trường, lãnh đạo các đơn vị, khoa, phòng ban cùng đông đảo giảng viên và sinh viên.\n\nĐặc biệt, trong lễ tốt nghiệp năm nay có các sinh viên tốt nghiệp chương trình cao đẳng nghề thuộc Đề án “Một vành đai, Một con đường” mà chúng ta đã và đang triển khai. Các em được tham dự và nhận bằng trong cùng lễ tốt nghiệp chính thức của nhà trường với toàn thể sinh viên khóa 2026.\n\nĐây là một dấu mốc rất ý nghĩa, thể hiện sự ghi nhận của nhà trường đối với chương trình đào tạo, đồng thời khẳng định tính chính quy và sự gắn kết của chương trình trong hệ thống đào tạo của Trường Đại học Công nghệ Điện tử Quế Lâm.",
+    graduationImageUrls: [],
     testimonialsHeading: "Học viên đi trước nói gì",
     testimonials: [
       {
