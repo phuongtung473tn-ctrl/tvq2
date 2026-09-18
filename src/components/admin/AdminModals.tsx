@@ -2832,6 +2832,18 @@ function LandingEditorModal({ onClose }: ModalProps) {
         draft.landing.graduationImageUrls.filter((_, i) => i !== index);
     });
   }
+  function replaceGraduationImage(index: number, file: File) {
+    if (
+      !/^image\/(png|jpeg|webp)$/.test(file.type) ||
+      file.size > 2 * 1024 * 1024
+    )
+      return;
+    readImageDataUrl(file).then((url) =>
+      update((draft) => {
+        draft.landing.graduationImageUrls[index] = url;
+      }),
+    );
+  }
   function uploadExpertImages(files: FileList) {
     const selected = Array.from(files).filter(
       (file) =>
@@ -4033,6 +4045,29 @@ function LandingEditorModal({ onClose }: ModalProps) {
                   alt={`Ảnh minh chứng ${i + 1}`}
                   className="h-full w-full object-cover"
                 />
+                <input
+                  type="file"
+                  accept="image/png,image/jpeg,image/webp"
+                  className="hidden"
+                  id={`graduation-replace-${i}`}
+                  onChange={(event) => {
+                    const file = event.target.files?.[0];
+                    if (file) replaceGraduationImage(i, file);
+                    event.target.value = "";
+                  }}
+                />
+                <button
+                  type="button"
+                  onClick={() =>
+                    document
+                      .getElementById(`graduation-replace-${i}`)
+                      ?.click()
+                  }
+                  aria-label="Thay thế ảnh"
+                  className="absolute bottom-1 left-1 rounded bg-black/70 px-1 py-0.5 text-[9px] font-bold text-white opacity-0 transition group-hover:opacity-100"
+                >
+                  Đổi
+                </button>
                 <button
                   type="button"
                   onClick={() => removeGraduationImage(i)}
@@ -4193,12 +4228,145 @@ function LandingEditorModal({ onClose }: ModalProps) {
           onChange={(e) => updateJson("benefits", e.target.value)}
         />
       </Field>
-      <Field label="Testimonials (JSON array gồm name, meta, text)">
-        <TextArea
-          value={JSON.stringify(content.testimonials, null, 2)}
-          onChange={(e) => updateJson("testimonials", e.target.value)}
+      <Field label="Tiêu đề phần Testimonials">
+        <TextInput
+          value={content.testimonialsHeading}
+          onChange={(e) =>
+            update((d) => (d.landing.testimonialsHeading = e.target.value))
+          }
         />
       </Field>
+      <div className="mb-3 rounded-xl border border-neutral-200 p-3 dark:border-white/10">
+        <p className="text-xs font-bold">Danh sách Testimonials</p>
+        <p className="mt-1 text-[11px] text-neutral-400">
+          Chỉnh sửa tên, thông tin, lời nhận xét và ảnh đại diện từng học viên.
+        </p>
+        {content.testimonials.map((t, ti) => (
+          <div
+            key={ti}
+            className="mt-3 rounded-lg border border-neutral-200 p-3 dark:border-white/10"
+          >
+            <div className="mb-2 flex items-center justify-between">
+              <span className="text-xs font-bold">Học viên {ti + 1}</span>
+              <button
+                type="button"
+                onClick={() =>
+                  update((d) => {
+                    d.landing.testimonials.splice(ti, 1);
+                  })
+                }
+                className="rounded-md p-1 text-red-500 hover:bg-red-50"
+                aria-label="Xóa testimonial"
+              >
+                <Trash2 className="h-3.5 w-3.5" />
+              </button>
+            </div>
+            <Field label="Tên">
+              <TextInput
+                value={t.name}
+                onChange={(e) =>
+                  update((d) => {
+                    d.landing.testimonials[ti]!.name = e.target.value;
+                  })
+                }
+              />
+            </Field>
+            <Field label="Thông tin (ngành, địa điểm, khóa)">
+              <TextInput
+                value={t.meta}
+                onChange={(e) =>
+                  update((d) => {
+                    d.landing.testimonials[ti]!.meta = e.target.value;
+                  })
+                }
+              />
+            </Field>
+            <Field label="Lời nhận xét">
+              <TextArea
+                value={t.text}
+                onChange={(e) =>
+                  update((d) => {
+                    d.landing.testimonials[ti]!.text = e.target.value;
+                  })
+                }
+              />
+            </Field>
+            <Field label="Ảnh đại diện (tùy chọn)">
+              <div className="flex items-center gap-2">
+                {t.avatarUrl && (
+                  <img
+                    src={t.avatarUrl}
+                    alt={t.name}
+                    className="h-12 w-12 rounded-full object-cover ring-2 ring-border"
+                  />
+                )}
+                <input
+                  type="file"
+                  accept="image/png,image/jpeg,image/webp"
+                  className="hidden"
+                  id={`testimonial-avatar-${ti}`}
+                  onChange={(event) => {
+                    const file = event.target.files?.[0];
+                    if (!file) return;
+                    if (
+                      /^image\/(png|jpeg|webp)$/.test(file.type) &&
+                      file.size <= 2 * 1024 * 1024
+                    ) {
+                      readImageDataUrl(file).then((url) =>
+                        update((d) => {
+                          d.landing.testimonials[ti]!.avatarUrl = url;
+                        }),
+                      );
+                    }
+                    event.target.value = "";
+                  }}
+                />
+                <button
+                  type="button"
+                  onClick={() =>
+                    document
+                      .getElementById(`testimonial-avatar-${ti}`)
+                      ?.click()
+                  }
+                  className="rounded-lg bg-neutral-900 px-3 py-1.5 text-xs font-bold text-white"
+                >
+                  {t.avatarUrl ? "Đổi ảnh" : "Tải ảnh lên"}
+                </button>
+                {t.avatarUrl && (
+                  <button
+                    type="button"
+                    onClick={() =>
+                      update((d) => {
+                        d.landing.testimonials[ti]!.avatarUrl = "";
+                      })
+                    }
+                    className="rounded-md p-1 text-red-500 hover:bg-red-50"
+                    aria-label="Xóa ảnh"
+                  >
+                    <Trash2 className="h-3.5 w-3.5" />
+                  </button>
+                )}
+              </div>
+            </Field>
+          </div>
+        ))}
+        <button
+          type="button"
+          onClick={() =>
+            update((d) => {
+              d.landing.testimonials.push({
+                name: "Học viên mới",
+                meta: "Ngành · Địa điểm · khóa",
+                text: "Lời nhận xét của học viên.",
+                avatarUrl: "",
+              });
+            })
+          }
+          className="mt-2 flex w-full items-center justify-center gap-1.5 rounded-lg border border-dashed border-neutral-300 py-2 text-xs font-semibold text-neutral-600"
+        >
+          <Plus className="h-3.5 w-3.5" /> Thêm testimonial
+        </button>
+      </div>
       <Field label="Steps (JSON array gồm number, title, description)">
         <TextArea
           value={JSON.stringify(content.steps, null, 2)}

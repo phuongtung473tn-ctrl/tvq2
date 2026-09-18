@@ -233,10 +233,13 @@ function Landing() {
     variant === "B" ? config.abTest.variantBCta : config.abTest.variantACta;
   const section = (id: string) =>
     content.sectionsArray.find((item) => item.id === id);
-  const sectionStyle = (id: string) => ({
-    order: content.sectionsArray.findIndex((item) => item.id === id) + 1,
-    display: section(id)?.enabled === false ? "none" : undefined,
-  });
+  const sectionStyle = (id: string) => {
+    const idx = content.sectionsArray.findIndex((item) => item.id === id);
+    return {
+      order: (idx + 1) * 10,
+      display: section(id)?.enabled === false ? "none" : undefined,
+    };
+  };
   const gallerySlides = GALLERY.map((slide, index) => ({
     ...slide,
     img: content.galleryImageUrls[index] || slide.img,
@@ -253,7 +256,7 @@ function Landing() {
         sectionIndexMap.get(anchorId) ?? sectionIndexMap.get("gallery") ?? 6;
       return {
         ...slider,
-        order: anchorIdx + 1 + 0.1 * (idx + 1),
+        order: (anchorIdx + 1) * 10 + idx + 1,
         slides: slider.imageUrls
           .map((img, i) => ({ img, caption: slider.captions[i] || "" }))
           .filter((s) => s.img),
@@ -495,7 +498,7 @@ function Landing() {
 
       {config.trafficStats.enabled &&
         config.trafficStats.position === "afterHero" && (
-          <section className="border-b border-border/40 bg-muted/20 py-3">
+          <section style={{ order: 15 }} className="border-b border-border/40 bg-muted/20 py-3">
             <div className="mx-auto max-w-6xl px-4">
               <FooterStats
                 title={config.trafficStats.title}
@@ -765,7 +768,7 @@ function Landing() {
       </section>
 
       {homeCustomSections.map((item) => (
-        <div key={item.id} style={{ order: item.order + 1 }}>
+        <div key={item.id} style={{ order: (item.order + 1) * 10 + 5 }}>
           <ContentSection section={item} />
         </div>
       ))}
@@ -773,7 +776,7 @@ function Landing() {
       {/* Graduation proof — ngay trên phần ưu đãi */}
       {content.graduationImageUrls.length > 0 && (
         <section
-          style={{ order: 96 }}
+          style={{ order: 960 }}
           className="border-y border-border bg-muted/40 py-16 sm:py-20"
         >
           <div className="mx-auto max-w-6xl px-4">
@@ -811,7 +814,7 @@ function Landing() {
       )}
 
       {offerSection && (
-        <div style={{ order: 97 }}>
+        <div style={{ order: 970 }}>
           <ContentSection section={offerSection} />
         </div>
       )}
@@ -820,7 +823,7 @@ function Landing() {
       <section
         id="faq"
         style={{
-          order: 98,
+          order: 980,
           display: section("faq")?.enabled === false ? "none" : undefined,
         }}
         className="mx-auto max-w-3xl px-4 py-16 sm:py-20"
@@ -860,7 +863,7 @@ function Landing() {
 
       {/* Footer */}
       <footer
-        style={{ order: 99 }}
+        style={{ order: 990 }}
         className="border-t border-border bg-background py-12"
       >
         {config.trafficStats.enabled &&
@@ -947,7 +950,7 @@ function Landing() {
 
       {/* Mobile sticky CTA (2 nút, hiện sau khi cuộn qua hero) */}
       <StickyMobileCTA />
-      <div className="h-20 sm:hidden" style={{ order: 100 }} />
+      <div className="h-20 sm:hidden" style={{ order: 1000 }} />
     </div>
   );
 }
