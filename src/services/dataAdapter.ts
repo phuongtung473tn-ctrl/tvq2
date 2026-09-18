@@ -13,7 +13,10 @@ import {
 } from "@/config/site-config";
 import type { VisitorBehaviorPayload } from "@/types/visitor-tracking";
 import { relayWebhook } from "@/services/webhook.functions";
-import { getSupabaseAccessToken } from "@/lib/supabase-auth";
+import {
+  getSupabaseAccessToken,
+  ensureSupabaseAccessToken,
+} from "@/lib/supabase-auth";
 import { saveConfigWithSupabaseAuth } from "@/services/config.functions";
 
 const CONFIG_KEY = "funnel_site_config_v1";
@@ -238,6 +241,10 @@ export async function saveConfig(config: SiteConfig): Promise<boolean> {
   if (config.admin.storageMode === "database") {
     clearClientCache();
     if (config.admin.supabaseUrl && config.admin.supabaseAnonKey) {
+      await ensureSupabaseAccessToken(
+        config.admin.supabaseUrl,
+        config.admin.supabaseAnonKey,
+      );
       return await syncConfigToSupabase(config);
     } else {
       console.error(

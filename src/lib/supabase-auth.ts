@@ -1,4 +1,6 @@
 const ACCESS_TOKEN_KEY = "funnel_supabase_access_token_v1";
+const REFRESH_TOKEN_KEY = "funnel_supabase_refresh_token_v1";
+const CONTEXT_KEY = "funnel_supabase_auth_context_v1";
 
 export type SupabaseSignInResult =
   | { ok: true }
@@ -47,6 +49,98 @@ export function clearSupabaseAccessToken(): void {
   if (!isBrowser()) return;
   try {
     window.sessionStorage.removeItem(ACCESS_TOKEN_KEY);
+    window.sessionStorage.removeItem(REFRESH_TOKEN_KEY);
+    window.sessionStorage.removeItem(CONTEXT_KEY);
+  } catch {
+    /* storage may be blocked */
+  }
+}
+
+function readAuthContext(): { url: string; anonKey: string } | null {
+  if (!isBrowser()) return null;
+  try {
+    const raw = window.sessionStorage.getItem(CONTEXT_KEY);
+    if (!raw) return null;
+    const parsed = JSON.parse(raw) as { url?: unknown; anonKey?: unknown };
+    if (typeof parsed.url === "string" && typeof parsed.anonKey === "string")
+      return { url: parsed.url, anonKey: parsed.anonKey };
+    return null;
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Trả về access token còn hạn. Nếu token đã hết hạn nhưng còn refresh token,
+ * tự động gia hạn phiên với Supabase để lần lưu cấu hình không bị RLS từ chối
+ * (nguyên nhân khiến cấu hình "không lưu được" và bị trả về giá trị cũ).
+ */
+export async function ensureSupabaseAccessToken(
+  url?: string,
+  anonKey?: string,
+): Promise<string> {
+  if (!isBrowser()) return "";
+  const current = getSupabaseAccessToken();
+  if (current) return current;
+  let refreshToken = "";
+  try {
+    refreshToken = window.sessionStorage.getItem(REFRESH_TOKEN_KEY) || "";
+  } catch {
+    refreshToken = "";
+  }
+  if (!refreshToken) return "";
+  const context = readAuthContext();
+  const resolvedUrl = (url || context?.url || "").replace(/\/$/, "");
+  const resolvedKey = anonKey || context?.anonKey || "";
+  if (!resolvedUrl || !resolvedKey) return "";
+  try {
+    const response = await fetch(
+      `${resolvedUrl}/auth/v1/token?grant_type=refresh_token`,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json", apikey: resolvedKey },
+        body: JSON.stringify({ refresh_token: refreshToken }),
+      },
+    );
+    if (!response.ok) {
+      clearSupabaseAccessToken();
+      return "";
+    }
+    const payload = (await response.json()) as {
+      access_token?: unknown;
+      refresh_token?: unknown;
+    };
+    if (typeof payload.access_token !== "string" || !payload.access_token) {
+      clearSupabaseAccessToken();
+      return "";
+    }
+    persistSupabaseSession(
+      payload.access_token,
+      typeof payload.refresh_token === "string" ? payload.refresh_token : "",
+      resolvedUrl,
+      resolvedKey,
+    );
+    return payload.access_token;
+  } catch {
+    return "";
+  }
+}
+
+function persistSupabaseSession(
+  accessToken: string,
+  refreshToken: string,
+  url: string,
+  anonKey: string,
+): void {
+  if (!isBrowser()) return;
+  try {
+    window.sessionStorage.setItem(ACCESS_TOKEN_KEY, accessToken);
+    if (refreshToken)
+      window.sessionStorage.setItem(REFRESH_TOKEN_KEY, refreshToken);
+    window.sessionStorage.setItem(
+      CONTEXT_KEY,
+      JSON.stringify({ url: url.replace(/\/$/, ""), anonKey }),
+    );
   } catch {
     /* storage may be blocked */
   }
@@ -110,6 +204,7 @@ export async function signInWithSupabase(
     }
     const payload = (await response.json()) as {
       access_token?: unknown;
+      refresh_token?: unknown;
       user?: { id?: unknown };
     };
     if (typeof payload.access_token !== "string" || !payload.access_token) {
@@ -138,7 +233,12 @@ export async function signInWithSupabase(
     const admins = (await adminResponse.json()) as unknown[];
     if (!Array.isArray(admins) || admins.length === 0)
       return { ok: false, reason: "not_admin" };
-    window.sessionStorage.setItem(ACCESS_TOKEN_KEY, payload.access_token);
+    persistSupabaseSession(
+      payload.access_token,
+      typeof payload.refresh_token === "string" ? payload.refresh_token : "",
+      url,
+      anonKey,
+    );
     return { ok: true };
   } catch {
     return { ok: false, reason: "network_error" };

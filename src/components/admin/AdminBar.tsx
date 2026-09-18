@@ -32,6 +32,7 @@ import {
   type LucideIcon,
 } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
+import { toast } from "sonner";
 
 import { useAdmin, type AdminModalKey } from "@/lib/use-admin";
 import { useSiteConfig } from "@/lib/use-site-config";
@@ -128,7 +129,27 @@ export function AdminBar() {
   } = useAdmin();
   const { save, dirty } = useSiteConfig();
   const [hidden, setHidden] = useState(true);
+  const [saving, setSaving] = useState(false);
   const [openGroup, setOpenGroup] = useState<string | null>(null);
+
+  async function handleSave() {
+    if (saving) return;
+    setSaving(true);
+    try {
+      const ok = await save();
+      if (ok) {
+        toast.success("Đã lưu cấu hình vào Supabase.");
+      } else {
+        toast.error(
+          "Chưa lưu được. Phiên đăng nhập có thể đã hết hạn — hãy đăng xuất và đăng nhập lại, hoặc kiểm tra kết nối/RLS Supabase.",
+        );
+      }
+    } catch {
+      toast.error("Lỗi khi lưu cấu hình. Kiểm tra kết nối mạng và Supabase.");
+    } finally {
+      setSaving(false);
+    }
+  }
   const barRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => setHidden(isDevicePreview()), []);
@@ -160,7 +181,7 @@ export function AdminBar() {
       ref={barRef}
       className="sticky top-0 z-[90] border-b border-white/10 bg-neutral-950 text-white"
     >
-      <div className="relative flex items-center gap-1 px-2 py-2">
+      <div className="relative flex flex-wrap items-center gap-x-1 gap-y-2 px-2 py-2">
         <span className="shrink-0 rounded-md bg-white/10 px-2 py-1 text-[10px] font-bold uppercase tracking-wide">
           Admin
         </span>
@@ -328,19 +349,20 @@ export function AdminBar() {
         {/* Lưu & đăng xuất luôn nằm sát mép phải */}
         <div className="ml-auto flex shrink-0 items-center gap-1">
           <button
-            onClick={save}
+            onClick={handleSave}
+            disabled={saving}
             aria-label={
               dirty ? "Lưu thay đổi (đang có thay đổi)" : "Lưu thay đổi"
             }
             title={dirty ? "Lưu thay đổi (đang có thay đổi)" : "Lưu thay đổi"}
-            className={`relative ${ICON_BUTTON} ${
+            className={`relative ${ICON_BUTTON} disabled:opacity-60 ${
               dirty
                 ? "bg-emerald-500 text-white"
                 : "bg-white/10 text-white/70 hover:bg-white/20"
             }`}
           >
-            <Save className="h-4 w-4" />
-            {dirty && (
+            <Save className={`h-4 w-4 ${saving ? "animate-pulse" : ""}`} />
+            {dirty && !saving && (
               <span className="absolute -right-0.5 -top-0.5 h-2 w-2 rounded-full bg-amber-300" />
             )}
           </button>

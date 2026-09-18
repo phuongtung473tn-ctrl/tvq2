@@ -9,7 +9,7 @@ import {
 } from "react";
 import {
   clearSupabaseAccessToken,
-  getSupabaseAccessToken,
+  ensureSupabaseAccessToken,
   signInWithSupabase,
   type SupabaseSignInResult,
 } from "@/lib/supabase-auth";
@@ -81,14 +81,32 @@ export function AdminProvider({ children }: { children: ReactNode }) {
   const [previewEnabled, setPreviewEnabledState] = useState(true);
 
   useEffect(() => {
-    try {
-      setAuthed(
-        window.sessionStorage.getItem(AUTH_KEY) === "1" &&
-          Boolean(getSupabaseAccessToken()),
-      );
-    } catch {
-      /* ignore */
+    let cancelled = false;
+    async function restoreSession() {
+      let flagged = false;
+      try {
+        flagged = window.sessionStorage.getItem(AUTH_KEY) === "1";
+      } catch {
+        flagged = false;
+      }
+      if (!flagged) return;
+      const token = await ensureSupabaseAccessToken();
+      if (cancelled) return;
+      if (token) {
+        setAuthed(true);
+      } else {
+        try {
+          window.sessionStorage.removeItem(AUTH_KEY);
+          clearSupabaseAccessToken();
+        } catch {
+          /* ignore */
+        }
+      }
     }
+    void restoreSession();
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   const setDeviceSize = useCallback((view: DeviceView, size: DeviceSize) => {
