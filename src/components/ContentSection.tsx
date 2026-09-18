@@ -51,7 +51,7 @@ export function ContentSection({ section }: { section: ContentSectionData }) {
           <img
             src={section.content.imageUrl}
             alt=""
-            className="mb-6 max-h-[28rem] w-full rounded-2xl object-cover"
+            className="mb-6 max-h-[20rem] w-full max-w-full rounded-2xl object-cover sm:max-h-[28rem]"
             loading="lazy"
           />
         )

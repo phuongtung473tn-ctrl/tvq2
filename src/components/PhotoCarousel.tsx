@@ -68,7 +68,7 @@ export function PhotoCarousel({
                     height={800}
                     loading="lazy"
                     decoding="async"
-                    className="aspect-[16/10] w-full cursor-zoom-in object-cover transition group-hover:brightness-95"
+                    className="aspect-[16/10] w-full max-w-full cursor-zoom-in object-cover transition group-hover:brightness-95"
                   />
                   <span className="pointer-events-none absolute bottom-2 right-2 rounded-lg bg-background/80 px-2 py-1 text-[10px] font-bold text-foreground opacity-0 backdrop-blur transition group-hover:opacity-100">
                     Bam de phong to
@@ -85,7 +85,7 @@ export function PhotoCarousel({
             type="button"
             aria-label="Anh truoc"
             onClick={() => setI((p) => (p - 1 + slides.length) % slides.length)}
-            className="absolute left-2 top-1/3 flex h-10 w-10 items-center justify-center rounded-full bg-background/80 text-lg font-bold backdrop-blur"
+            className="absolute left-2 top-1/2 flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-full bg-background/80 text-lg font-bold backdrop-blur sm:h-10 sm:w-10"
           >
             ‹
           </button>
@@ -93,7 +93,7 @@ export function PhotoCarousel({
             type="button"
             aria-label="Anh tiep theo"
             onClick={() => setI((p) => (p + 1) % slides.length)}
-            className="absolute right-2 top-1/3 flex h-10 w-10 items-center justify-center rounded-full bg-background/80 text-lg font-bold backdrop-blur"
+            className="absolute right-2 top-1/2 flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-full bg-background/80 text-lg font-bold backdrop-blur sm:h-10 sm:w-10"
           >
             ›
           </button>

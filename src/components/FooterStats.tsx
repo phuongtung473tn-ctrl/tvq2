@@ -57,7 +57,7 @@ export function FooterStats({
         </span>
         <h3 className="text-[11px] font-bold text-muted-foreground">{title}</h3>
       </div>
-      <div className="grid grid-cols-4 gap-2">
+      <div className="grid grid-cols-2 gap-2 sm:grid-cols-4 sm:gap-3">
         {quickStats.map((stat) => (
           <div key={stat.label} className="text-center">
             <div className="flex items-center justify-center gap-1 text-[9px] font-medium uppercase tracking-wide text-muted-foreground/70">
@@ -66,13 +66,13 @@ export function FooterStats({
             <p className="mt-0.5 text-sm font-bold tabular-nums text-foreground">
               {stat.value}
             </p>
-            <p className="text-[8px] leading-tight text-muted-foreground/60">
+            <p className="text-[9px] leading-tight text-muted-foreground/60 sm:text-[8px]">
               {stat.label}
             </p>
           </div>
         ))}
       </div>
-      <p className="mt-1.5 text-[9px] leading-tight text-muted-foreground/50">
+      <p className="mt-1.5 text-[10px] leading-tight text-muted-foreground/50 sm:text-[9px]">
         {helperText}
       </p>
     </aside>

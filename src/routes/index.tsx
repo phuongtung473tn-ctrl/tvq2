@@ -625,7 +625,7 @@ function Landing() {
                     height={640}
                     loading="lazy"
                     decoding="async"
-                    className="h-20 w-20 shrink-0 rounded-full object-cover ring-2 ring-border"
+                    className="h-20 w-20 max-w-full shrink-0 rounded-full object-cover ring-2 ring-border"
                   />
                   <h3 className="mt-4 text-base font-bold leading-snug">
                     {e.name}
@@ -693,7 +693,7 @@ function Landing() {
         <h2 className="text-2xl font-extrabold sm:text-3xl lg:text-4xl">
           {content.testimonialsHeading}
         </h2>
-        <div className="mt-9 grid gap-5 lg:grid-cols-3">
+        <div className="mt-9 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
           {content.testimonials.map((t, i) => (
             <Reveal key={t.name} delay={i * 100}>
               <blockquote className="flex h-full flex-col rounded-2xl border border-border bg-card p-6 shadow-[var(--shadow-card)] transition hover:-translate-y-1">
@@ -803,7 +803,7 @@ function Landing() {
                       src={src}
                       alt={`Minh chứng lễ tốt nghiệp ${i + 1}`}
                       loading="lazy"
-                      className="h-full w-full object-cover transition duration-500 group-hover:scale-110"
+                      className="h-full w-full max-w-full object-cover transition duration-500 group-hover:scale-110"
                     />
                   </div>
                 ))}
