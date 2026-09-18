@@ -1,5 +1,5 @@
 import { checkEmailConfig, sendTestEmail } from "@/lib/email.functions";
-import { Download, GraduationCap, Plus, Trash2 } from "lucide-react";
+import { Copy, Download, GraduationCap, Plus, Trash2 } from "lucide-react";
 import {
   useCallback,
   useEffect,
@@ -3697,18 +3697,38 @@ function LandingEditorModal({ onClose }: ModalProps) {
               <span className="text-xs font-bold">
                 Slider {si + 1}: {slider.heading || "(chưa đặt tên)"}
               </span>
-              <button
-                type="button"
-                onClick={() =>
-                  update((d) => {
-                    d.landing.gallerySliders.splice(si, 1);
-                  })
-                }
-                className="rounded-md p-1 text-red-500 hover:bg-red-50"
-                aria-label="Xóa slider"
-              >
-                <Trash2 className="h-3.5 w-3.5" />
-              </button>
+              <div className="flex items-center gap-1">
+                <button
+                  type="button"
+                  onClick={() =>
+                    update((d) => {
+                      const src = d.landing.gallerySliders[si]!;
+                      d.landing.gallerySliders.splice(si + 1, 0, {
+                        ...structuredClone(src),
+                        id: `slider-${Date.now()}`,
+                        heading: `${src.heading} (bản sao)`,
+                      });
+                    })
+                  }
+                  className="rounded-md p-1 text-neutral-500 hover:bg-neutral-100 dark:hover:bg-white/10"
+                  aria-label="Nhân bản slider"
+                  title="Nhân bản slider"
+                >
+                  <Copy className="h-3.5 w-3.5" />
+                </button>
+                <button
+                  type="button"
+                  onClick={() =>
+                    update((d) => {
+                      d.landing.gallerySliders.splice(si, 1);
+                    })
+                  }
+                  className="rounded-md p-1 text-red-500 hover:bg-red-50"
+                  aria-label="Xóa slider"
+                >
+                  <Trash2 className="h-3.5 w-3.5" />
+                </button>
+              </div>
             </div>
             <Toggle
               checked={slider.enabled}
@@ -3719,6 +3739,23 @@ function LandingEditorModal({ onClose }: ModalProps) {
               }
               label="Hiển thị slider này"
             />
+            <Field label="Vị trí hiển thị (hiện sau khối nào)">
+              <select
+                value={slider.insertAfter || "gallery"}
+                onChange={(e) =>
+                  update((d) => {
+                    d.landing.gallerySliders[si]!.insertAfter = e.target.value;
+                  })
+                }
+                className="w-full rounded-md border border-neutral-300 bg-white px-2 py-1.5 text-xs dark:border-white/10 dark:bg-neutral-900"
+              >
+                {content.sectionsArray.map((sec) => (
+                  <option key={sec.id} value={sec.id}>
+                    Sau: {sec.label}
+                  </option>
+                ))}
+              </select>
+            </Field>
             <Field label="Tiêu đề">
               <TextInput
                 value={slider.heading}
@@ -3862,6 +3899,7 @@ function LandingEditorModal({ onClose }: ModalProps) {
                 imageUrls: [],
                 captions: [],
                 enabled: true,
+                insertAfter: "gallery",
               });
             })
           }

@@ -242,18 +242,23 @@ function Landing() {
     img: content.galleryImageUrls[index] || slide.img,
     caption: content.galleryCaptions[index] || slide.caption,
   }));
-  const galleryOrder = content.sectionsArray.findIndex(
-    (item) => item.id === "gallery",
+  const sectionOrderMap = new Map(
+    content.sectionsArray.map((item) => [item.id, item.order]),
   );
   const extraGallerySliders = content.gallerySliders
     .filter((slider) => slider.enabled)
-    .map((slider, idx) => ({
-      ...slider,
-      order: galleryOrder + 1 + 0.1 * (idx + 1),
-      slides: slider.imageUrls
-        .map((img, i) => ({ img, caption: slider.captions[i] || "" }))
-        .filter((s) => s.img),
-    }))
+    .map((slider, idx) => {
+      const anchorId = slider.insertAfter || "gallery";
+      const anchorOrder =
+        sectionOrderMap.get(anchorId) ?? sectionOrderMap.get("gallery") ?? 6;
+      return {
+        ...slider,
+        order: anchorOrder + 1 + 0.1 * (idx + 1),
+        slides: slider.imageUrls
+          .map((img, i) => ({ img, caption: slider.captions[i] || "" }))
+          .filter((s) => s.img),
+      };
+    })
     .filter((slider) => slider.slides.length > 0);
   const faqs = content.faqs.map((faq) => ({
     slug: faq.slug,

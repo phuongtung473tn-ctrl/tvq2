@@ -127,6 +127,7 @@ export interface GallerySliderConfig {
   imageUrls: string[];
   captions: string[];
   enabled: boolean;
+  insertAfter: string;
 }
 
 export interface FormField {
@@ -548,6 +549,7 @@ export const DEFAULT_CONFIG: SiteConfig = {
         imageUrls: [],
         captions: [],
         enabled: true,
+        insertAfter: "gallery",
       },
       {
         id: "dantoc-quangtay",
@@ -557,6 +559,7 @@ export const DEFAULT_CONFIG: SiteConfig = {
         imageUrls: [],
         captions: [],
         enabled: true,
+        insertAfter: "gallery",
       },
       {
         id: "congnghe-qualam",
@@ -567,6 +570,7 @@ export const DEFAULT_CONFIG: SiteConfig = {
         imageUrls: [],
         captions: [],
         enabled: true,
+        insertAfter: "gallery",
       },
       {
         id: "dh-qualam",
@@ -576,6 +580,7 @@ export const DEFAULT_CONFIG: SiteConfig = {
         imageUrls: [],
         captions: [],
         enabled: true,
+        insertAfter: "gallery",
       },
     ],
     graduationBadge: "Khóa 2023-2026 Tốt nghiệp",
