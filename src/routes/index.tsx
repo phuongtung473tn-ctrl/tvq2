@@ -653,9 +653,10 @@ function Landing() {
       </section>
 
       {/* Additional customizable gallery sliders */}
-      {extraGallerySliders.map((slider) => (
+      {extraGallerySliders.map((slider, idx) => (
         <section
           key={slider.id}
+          style={{ order: 7 + 0.1 * (idx + 1) }}
           className="mx-auto max-w-3xl px-4 py-12 sm:py-16"
         >
           <h2 className="text-xl font-extrabold sm:text-2xl lg:text-3xl">
