@@ -326,13 +326,13 @@ function Landing() {
   }, [content.heroMediaMode, content.heroSliderIntervalMs, heroSlides.length]);
 
   return (
-    <div id="top" className="flex min-h-screen flex-col bg-background">
+    <div id="top" className="flex min-h-screen flex-col overflow-x-hidden bg-background">
       <Toaster position="top-center" richColors />
 
       {/* Header */}
       <header
         style={{ order: 0 }}
-        className="sticky top-0 z-40 border-b border-border/60 bg-background/80 backdrop-blur"
+        className="sticky top-0 z-40 w-full border-b border-border/60 bg-background/80 backdrop-blur"
       >
         <div className="mx-auto flex max-w-6xl items-center gap-3 px-4 py-3">
           <SiteMenu
@@ -425,7 +425,7 @@ function Landing() {
       {/* Hero */}
       <section
         style={sectionStyle("hero")}
-        className="surface-panel relative overflow-hidden"
+        className="surface-panel relative w-full overflow-hidden"
       >
         <div className="absolute inset-0">
           {heroSlides.map((slide, index) => (
@@ -498,7 +498,7 @@ function Landing() {
 
       {config.trafficStats.enabled &&
         config.trafficStats.position === "afterHero" && (
-          <section style={{ order: 15 }} className="border-b border-border/40 bg-muted/20 py-3">
+          <section style={{ order: 15 }} className="w-full border-b border-border/40 bg-muted/20 py-3">
             <div className="mx-auto max-w-6xl px-4">
               <FooterStats
                 title={config.trafficStats.title}
@@ -511,7 +511,7 @@ function Landing() {
       {/* Stats */}
       <section
         style={sectionStyle("stats")}
-        className="border-b border-border bg-muted/50 py-10"
+        className="w-full border-b border-border bg-muted/50 py-10"
       >
         <div className="mx-auto grid max-w-6xl grid-cols-2 gap-4 px-4 lg:grid-cols-4">
           {content.stats.map((s, i) => (
@@ -532,7 +532,7 @@ function Landing() {
       {/* Pain */}
       <section
         style={sectionStyle("pains")}
-        className="mx-auto max-w-6xl px-4 py-16 sm:py-20"
+        className="mx-auto w-full max-w-6xl px-4 py-16 sm:py-20"
       >
         <h2 className="max-w-2xl text-2xl font-extrabold sm:text-3xl lg:text-4xl">
           {content.painHeading}
@@ -553,7 +553,7 @@ function Landing() {
       <section
         style={sectionStyle("benefits")}
         data-section="luong_thuc_tap"
-        className="bg-muted/60 py-16 sm:py-20"
+        className="w-full bg-muted/60 py-16 sm:py-20"
       >
         <div className="mx-auto max-w-6xl px-4">
           <h2 className="text-2xl font-extrabold sm:text-3xl lg:text-4xl">
@@ -579,7 +579,7 @@ function Landing() {
       <section
         style={sectionStyle("majors")}
         data-section="nganh_hoc"
-        className="mx-auto max-w-6xl px-4 py-16 sm:py-20"
+        className="mx-auto w-full max-w-6xl px-4 py-16 sm:py-20"
       >
         <h2 className="text-2xl font-extrabold sm:text-3xl lg:text-4xl">
           {content.majorsHeading}
@@ -605,7 +605,7 @@ function Landing() {
       {/* Experts */}
       <section
         style={sectionStyle("experts")}
-        className="bg-muted/50 py-16 sm:py-20"
+        className="w-full bg-muted/50 py-16 sm:py-20"
       >
         <div className="mx-auto max-w-6xl px-4">
           <h2 className="text-2xl font-extrabold sm:text-3xl lg:text-4xl">
@@ -649,7 +649,7 @@ function Landing() {
       {/* Gallery carousel — original visa/campus/dorm slider */}
       <section
         style={sectionStyle("gallery")}
-        className="mx-auto max-w-3xl px-4 py-16 sm:py-20"
+        className="mx-auto w-full max-w-3xl px-4 py-16 sm:py-20"
       >
         <h2 className="text-2xl font-extrabold sm:text-3xl lg:text-4xl">
           {content.galleryHeading}
@@ -669,7 +669,7 @@ function Landing() {
         <section
           key={slider.id}
           style={{ order: slider.order }}
-          className="mx-auto max-w-3xl px-4 py-12 sm:py-16"
+          className="mx-auto w-full max-w-3xl px-4 py-12 sm:py-16"
         >
           <h2 className="text-xl font-extrabold sm:text-2xl lg:text-3xl">
             {slider.heading}
@@ -688,7 +688,7 @@ function Landing() {
       {/* Testimonials */}
       <section
         style={sectionStyle("testimonials")}
-        className="mx-auto max-w-6xl px-4 py-16 sm:py-20"
+        className="mx-auto w-full max-w-6xl px-4 py-16 sm:py-20"
       >
         <h2 className="text-2xl font-extrabold sm:text-3xl lg:text-4xl">
           {content.testimonialsHeading}
@@ -726,7 +726,7 @@ function Landing() {
       {/* Steps */}
       <section
         style={sectionStyle("steps")}
-        className="surface-panel py-16 text-surface-foreground sm:py-20"
+        className="surface-panel w-full py-16 text-surface-foreground sm:py-20"
       >
         <div className="mx-auto max-w-6xl px-4">
           <h2 className="text-2xl font-extrabold sm:text-3xl lg:text-4xl">
@@ -751,7 +751,7 @@ function Landing() {
       {/* Final CTA */}
       <section
         style={sectionStyle("finalCta")}
-        className="bg-muted/60 py-16 sm:py-20"
+        className="w-full bg-muted/60 py-16 sm:py-20"
       >
         <div className="mx-auto max-w-3xl px-4">
           <h2 className="text-center text-2xl font-extrabold sm:text-3xl lg:text-4xl">
@@ -768,7 +768,7 @@ function Landing() {
       </section>
 
       {homeCustomSections.map((item) => (
-        <div key={item.id} style={{ order: (item.order + 1) * 10 + 5 }}>
+        <div key={item.id} className="w-full" style={{ order: (item.order + 1) * 10 + 5 }}>
           <ContentSection section={item} />
         </div>
       ))}
@@ -777,7 +777,7 @@ function Landing() {
       {content.graduationImageUrls.length > 0 && (
         <section
           style={{ order: 960 }}
-          className="border-y border-border bg-muted/40 py-16 sm:py-20"
+          className="w-full border-y border-border bg-muted/40 py-16 sm:py-20"
         >
           <div className="mx-auto max-w-6xl px-4">
             <div className="mx-auto max-w-3xl text-center">
@@ -797,13 +797,13 @@ function Landing() {
                 {content.graduationImageUrls.map((src, i) => (
                   <div
                     key={`${src}-${i}`}
-                    className="group aspect-square overflow-hidden rounded-xl border border-border bg-card shadow-[var(--shadow-card)]"
+                    className="group aspect-[4/3] overflow-hidden rounded-xl border border-border bg-card shadow-[var(--shadow-card)] sm:aspect-square"
                   >
                     <img
                       src={src}
                       alt={`Minh chứng lễ tốt nghiệp ${i + 1}`}
                       loading="lazy"
-                      className="h-full w-full max-w-full object-cover transition duration-500 group-hover:scale-110"
+                      className="h-full w-full object-cover transition duration-500 group-hover:scale-110"
                     />
                   </div>
                 ))}
@@ -814,7 +814,7 @@ function Landing() {
       )}
 
       {offerSection && (
-        <div style={{ order: 970 }}>
+        <div className="w-full" style={{ order: 970 }}>
           <ContentSection section={offerSection} />
         </div>
       )}
@@ -826,7 +826,7 @@ function Landing() {
           order: 980,
           display: section("faq")?.enabled === false ? "none" : undefined,
         }}
-        className="mx-auto max-w-3xl px-4 py-16 sm:py-20"
+        className="mx-auto w-full max-w-3xl px-4 py-16 sm:py-20"
       >
         <h2 className="text-center text-2xl font-extrabold sm:text-3xl lg:text-4xl">
           {content.faqHeading}
@@ -864,7 +864,7 @@ function Landing() {
       {/* Footer */}
       <footer
         style={{ order: 990 }}
-        className="border-t border-border bg-background py-12"
+        className="w-full border-t border-border bg-background py-12"
       >
         {config.trafficStats.enabled &&
           config.trafficStats.position === "footer" && (

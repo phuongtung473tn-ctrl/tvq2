@@ -48,12 +48,14 @@ export function ContentSection({ section }: { section: ContentSectionData }) {
         </div>
       ) : (
         section.content?.imageUrl && (
-          <img
-            src={section.content.imageUrl}
-            alt=""
-            className="mb-6 max-h-[20rem] w-full max-w-full rounded-2xl object-cover sm:max-h-[28rem]"
-            loading="lazy"
-          />
+          <div className="mb-6 aspect-[16/10] w-full overflow-hidden rounded-2xl bg-neutral-100 dark:bg-white/5">
+            <img
+              src={section.content.imageUrl}
+              alt=""
+              className="h-full w-full object-cover"
+              loading="lazy"
+            />
+          </div>
         )
       )}
       {variant === "offer" && (
