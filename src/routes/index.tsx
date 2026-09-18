@@ -242,10 +242,14 @@ function Landing() {
     img: content.galleryImageUrls[index] || slide.img,
     caption: content.galleryCaptions[index] || slide.caption,
   }));
+  const galleryOrder = content.sectionsArray.findIndex(
+    (item) => item.id === "gallery",
+  );
   const extraGallerySliders = content.gallerySliders
     .filter((slider) => slider.enabled)
-    .map((slider) => ({
+    .map((slider, idx) => ({
       ...slider,
+      order: galleryOrder + 1 + 0.1 * (idx + 1),
       slides: slider.imageUrls
         .map((img, i) => ({ img, caption: slider.captions[i] || "" }))
         .filter((s) => s.img),
@@ -656,7 +660,7 @@ function Landing() {
       {extraGallerySliders.map((slider, idx) => (
         <section
           key={slider.id}
-          style={{ order: 7 + 0.1 * (idx + 1) }}
+          style={{ order: slider.order }}
           className="mx-auto max-w-3xl px-4 py-12 sm:py-16"
         >
           <h2 className="text-xl font-extrabold sm:text-2xl lg:text-3xl">
