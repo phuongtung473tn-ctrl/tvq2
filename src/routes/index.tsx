@@ -242,6 +242,15 @@ function Landing() {
     img: content.galleryImageUrls[index] || slide.img,
     caption: content.galleryCaptions[index] || slide.caption,
   }));
+  const extraGallerySliders = content.gallerySliders
+    .filter((slider) => slider.enabled)
+    .map((slider) => ({
+      ...slider,
+      slides: slider.imageUrls
+        .map((img, i) => ({ img, caption: slider.captions[i] || "" }))
+        .filter((s) => s.img),
+    }))
+    .filter((slider) => slider.slides.length > 0);
   const faqs = content.faqs.map((faq) => ({
     slug: faq.slug,
     q: faq.question,
@@ -643,34 +652,25 @@ function Landing() {
         </Reveal>
       </section>
 
-      {/* Additional customizable gallery sliders */
-      {content.gallerySliders.filter((s) => s.enabled).map((slider) => {
-        const slides = slider.imageUrls
-          .map((img, i) => ({
-            img,
-            caption: slider.captions[i] || "",
-          }))
-          .filter((s) => s.img);
-        if (slides.length === 0) return null;
-        return (
-          <section
-            key={slider.id}
-            className="mx-auto max-w-3xl px-4 py-12 sm:py-16"
-          >
-            <h2 className="text-xl font-extrabold sm:text-2xl lg:text-3xl">
-              {slider.heading}
-            </h2>
-            <p className="mt-2 text-sm text-muted-foreground">
-              {slider.description}
-            </p>
-            <Reveal>
-              <div className="mt-6">
-                <PhotoCarousel slides={slides} />
-              </div>
-            </Reveal>
-          </section>
-        );
-      })}
+      {/* Additional customizable gallery sliders */}
+      {extraGallerySliders.map((slider) => (
+        <section
+          key={slider.id}
+          className="mx-auto max-w-3xl px-4 py-12 sm:py-16"
+        >
+          <h2 className="text-xl font-extrabold sm:text-2xl lg:text-3xl">
+            {slider.heading}
+          </h2>
+          <p className="mt-2 text-sm text-muted-foreground">
+            {slider.description}
+          </p>
+          <Reveal>
+            <div className="mt-6">
+              <PhotoCarousel slides={slider.slides} />
+            </div>
+          </Reveal>
+        </section>
+      ))}
 
       {/* Testimonials */}
       <section
