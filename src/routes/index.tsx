@@ -625,7 +625,7 @@ function Landing() {
         </div>
       </section>
 
-      {/* Gallery carousel */}
+      {/* Gallery carousel — original visa/campus/dorm slider */}
       <section
         style={sectionStyle("gallery")}
         className="mx-auto max-w-3xl px-4 py-16 sm:py-20"
@@ -642,6 +642,35 @@ function Landing() {
           </div>
         </Reveal>
       </section>
+
+      {/* Additional customizable gallery sliders */
+      {content.gallerySliders.filter((s) => s.enabled).map((slider) => {
+        const slides = slider.imageUrls
+          .map((img, i) => ({
+            img,
+            caption: slider.captions[i] || "",
+          }))
+          .filter((s) => s.img);
+        if (slides.length === 0) return null;
+        return (
+          <section
+            key={slider.id}
+            className="mx-auto max-w-3xl px-4 py-12 sm:py-16"
+          >
+            <h2 className="text-xl font-extrabold sm:text-2xl lg:text-3xl">
+              {slider.heading}
+            </h2>
+            <p className="mt-2 text-sm text-muted-foreground">
+              {slider.description}
+            </p>
+            <Reveal>
+              <div className="mt-6">
+                <PhotoCarousel slides={slides} />
+              </div>
+            </Reveal>
+          </section>
+        );
+      })}
 
       {/* Testimonials */}
       <section
@@ -892,13 +921,8 @@ function Landing() {
             </p>
           )}
           <p className="mt-4 text-xs leading-relaxed">
-            Đơn vị bảo trợ chuyên môn &amp; tuyển sinh: {FOOTER.sponsor}
-            {FOOTER.address ? ` — ${FOOTER.address}` : ""}
-            {FOOTER.licenseNumber
-              ? ` · Giấy phép hoạt động số ${FOOTER.licenseNumber}`
-              : ""}
-            . Chương trình liên kết đào tạo với các trường Cao đẳng nghề và
-            doanh nghiệp tại Trung Quốc.
+            {config.footer.sponsorText ||
+              `Đơn vị bảo trợ chuyên môn & tuyển sinh: ${FOOTER.sponsor}${FOOTER.address ? ` — ${FOOTER.address}` : ""}${FOOTER.licenseNumber ? ` · Giấy phép hoạt động số ${FOOTER.licenseNumber}` : ""}. Chương trình liên kết đào tạo với các trường Cao đẳng nghề và doanh nghiệp tại Trung Quốc.`}
           </p>
           <p className="mt-4 text-xs">
             © {new Date().getFullYear()} Bản quyền thuộc Trung tâm.

@@ -3680,6 +3680,196 @@ function LandingEditorModal({ onClose }: ModalProps) {
           Chọn nhiều ảnh
         </button>
       </div>
+      <div className="mb-3 rounded-xl border-2 border-sky-200 p-3 dark:border-sky-900">
+        <p className="text-xs font-bold text-sky-700">
+          Slider ảnh bổ sung (Hình ký kết, Trường ĐH, v.v.)
+        </p>
+        <p className="mt-1 text-[11px] text-neutral-400">
+          Mỗi khối hiển thị một slider riêng. Tải lên nhiều ảnh PNG/JPG/WebP
+          (tối đa 2MB). Tất cả nội dung có thể tuỳ chỉnh và lưu vào Supabase.
+        </p>
+        {content.gallerySliders.map((slider, si) => (
+          <div
+            key={slider.id}
+            className="mt-3 rounded-lg border border-neutral-200 p-3 dark:border-white/10"
+          >
+            <div className="mb-2 flex items-center justify-between gap-2">
+              <span className="text-xs font-bold">
+                Slider {si + 1}: {slider.heading || "(chưa đặt tên)"}
+              </span>
+              <button
+                type="button"
+                onClick={() =>
+                  update((d) => {
+                    d.landing.gallerySliders.splice(si, 1);
+                  })
+                }
+                className="rounded-md p-1 text-red-500 hover:bg-red-50"
+                aria-label="Xóa slider"
+              >
+                <Trash2 className="h-3.5 w-3.5" />
+              </button>
+            </div>
+            <Toggle
+              checked={slider.enabled}
+              onChange={(v) =>
+                update((d) => {
+                  d.landing.gallerySliders[si]!.enabled = v;
+                })
+              }
+              label="Hiển thị slider này"
+            />
+            <Field label="Tiêu đề">
+              <TextInput
+                value={slider.heading}
+                onChange={(e) =>
+                  update((d) => {
+                    d.landing.gallerySliders[si]!.heading = e.target.value;
+                  })
+                }
+              />
+            </Field>
+            <Field label="Mô tả">
+              <TextInput
+                value={slider.description}
+                onChange={(e) =>
+                  update((d) => {
+                    d.landing.gallerySliders[si]!.description = e.target.value;
+                  })
+                }
+              />
+            </Field>
+            <Field label="Caption (mỗi dòng một mục, khớp thứ tự ảnh)">
+              <TextArea
+                value={slider.captions.join("\n")}
+                onChange={(e) =>
+                  update((d) => {
+                    d.landing.gallerySliders[si]!.captions = e.target.value
+                      .split("\n")
+                      .map((l) => l.trim())
+                      .filter(Boolean);
+                  })
+                }
+              />
+            </Field>
+            <Field label="URL ảnh (JSON array)">
+              <TextArea
+                value={JSON.stringify(slider.imageUrls, null, 2)}
+                onChange={(e) => {
+                  try {
+                    const parsed = JSON.parse(e.target.value) as string[];
+                    if (Array.isArray(parsed))
+                      update((d) => {
+                        d.landing.gallerySliders[si]!.imageUrls = parsed;
+                      });
+                  } catch {
+                    /* keep editing */
+                  }
+                }}
+              />
+            </Field>
+            <input
+              type="file"
+              multiple
+              accept="image/png,image/jpeg,image/webp"
+              className="hidden"
+              id={`gallery-slider-upload-${slider.id}`}
+              onChange={(event) => {
+                if (!event.target.files) return;
+                const files = Array.from(event.target.files).filter(
+                  (f) =>
+                    /^image\/(png|jpeg|webp)$/.test(f.type) &&
+                    f.size <= 2 * 1024 * 1024,
+                );
+                if (files.length === 0) return;
+                Promise.all(
+                  files.map(
+                    (f) =>
+                      new Promise<string>((resolve, reject) => {
+                        const r = new FileReader();
+                        r.onload = () =>
+                          typeof r.result === "string"
+                            ? resolve(r.result)
+                            : reject(new Error("invalid"));
+                        r.onerror = () => reject(new Error("read failed"));
+                        r.readAsDataURL(f);
+                      }),
+                  ),
+                ).then((images) => {
+                  update((d) => {
+                    const s = d.landing.gallerySliders[si]!;
+                    s.imageUrls = [...s.imageUrls, ...images];
+                    s.captions = [
+                      ...s.captions,
+                      ...images.map(() => "Ảnh thực tế"),
+                    ];
+                  });
+                });
+                event.target.value = "";
+              }}
+            />
+            <button
+              type="button"
+              onClick={() =>
+                document
+                  .getElementById(`gallery-slider-upload-${slider.id}`)
+                  ?.click()
+              }
+              className="mt-2 rounded-lg bg-neutral-900 px-3 py-2 text-xs font-bold text-white"
+            >
+              Tải ảnh lên slider ({slider.imageUrls.length} ảnh)
+            </button>
+            {slider.imageUrls.length > 0 && (
+              <div className="mt-2 grid grid-cols-4 gap-1.5 sm:grid-cols-6">
+                {slider.imageUrls.map((src, ii) => (
+                  <div
+                    key={`${src}-${ii}`}
+                    className="group relative aspect-square overflow-hidden rounded border border-neutral-200 dark:border-white/10"
+                  >
+                    <img
+                      src={src}
+                      alt={`Ảnh ${ii + 1}`}
+                      className="h-full w-full object-cover"
+                    />
+                    <button
+                      type="button"
+                      onClick={() =>
+                        update((d) => {
+                          const s = d.landing.gallerySliders[si]!;
+                          s.imageUrls.splice(ii, 1);
+                          s.captions.splice(ii, 1);
+                        })
+                      }
+                      aria-label="Xóa ảnh"
+                      className="absolute right-0.5 top-0.5 rounded-full bg-black/70 px-1 py-0.5 text-[9px] font-bold text-white opacity-0 transition group-hover:opacity-100"
+                    >
+                      ✕
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        ))}
+        <button
+          type="button"
+          onClick={() =>
+            update((d) => {
+              d.landing.gallerySliders.push({
+                id: `slider-${Date.now()}`,
+                heading: "Slider ảnh mới",
+                description: "Mô tả cho slider ảnh mới.",
+                imageUrls: [],
+                captions: [],
+                enabled: true,
+              });
+            })
+          }
+          className="mt-2 flex w-full items-center justify-center gap-1.5 rounded-lg border border-dashed border-neutral-300 py-2 text-xs font-semibold text-neutral-600"
+        >
+          <Plus className="h-3.5 w-3.5" /> Thêm slider ảnh
+        </button>
+      </div>
       <div className="mb-3 rounded-xl border border-neutral-200 p-3 dark:border-white/10">
         <p className="text-xs font-bold">
           Minh chứng tốt nghiệp (Trust section)
@@ -3815,6 +4005,17 @@ function LandingEditorModal({ onClose }: ModalProps) {
           value={content.finalCtaDescription}
           onChange={(e) =>
             update((d) => (d.landing.finalCtaDescription = e.target.value))
+          }
+        />
+      </Field>
+      <Field
+        label="Nội dung chân trang — đơn vị bảo trợ"
+        hint="Hiển thị ở cuối trang. Để trống thì dùng giá trị mặc định."
+      >
+        <TextArea
+          value={config.footer.sponsorText}
+          onChange={(e) =>
+            update((d) => (d.footer.sponsorText = e.target.value))
           }
         />
       </Field>

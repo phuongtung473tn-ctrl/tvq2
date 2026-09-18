@@ -117,6 +117,16 @@ export interface FooterConfig {
   logoUrl: string;
   menuLabel: string;
   menuLinks: { label: string; href: string }[];
+  sponsorText: string;
+}
+
+export interface GallerySliderConfig {
+  id: string;
+  heading: string;
+  description: string;
+  imageUrls: string[];
+  captions: string[];
+  enabled: boolean;
 }
 
 export interface FormField {
@@ -210,6 +220,7 @@ export interface LandingConfig {
   galleryHeading: string;
   galleryDescription: string;
   galleryCaptions: string[];
+  gallerySliders: GallerySliderConfig[];
   graduationBadge: string;
   graduationHeading: string;
   graduationDescription: string;
@@ -528,6 +539,45 @@ export const DEFAULT_CONFIG: SiteConfig = {
       "Phòng ký túc xá trong trường — miễn 100% phí ở",
       "Học viên lên đường nhập học kỳ tháng 9",
     ],
+    gallerySliders: [
+      {
+        id: "ky-ket",
+        heading: "Hình ảnh ký kết hợp tác",
+        description:
+          "Các buổi lễ ký kết hợp tác giữa trung tâm và trường đại học, doanh nghiệp đối tác tại Trung Quốc.",
+        imageUrls: [],
+        captions: [],
+        enabled: true,
+      },
+      {
+        id: "dantoc-quangtay",
+        heading: "Trường Đại học Dân tộc Quảng Tây",
+        description:
+          "Khuôn viên, cơ sở vật chất và môi trường học tập tại Trường Đại học Dân tộc Quảng Tây.",
+        imageUrls: [],
+        captions: [],
+        enabled: true,
+      },
+      {
+        id: "congnghe-qualam",
+        heading:
+          "Trường Đại học Công nghệ Kỹ thuật Quế Lâm — Học viện Công nghệ Quảng Tây",
+        description:
+          "Học viên được các tập đoàn lớn tiếp nhận vào làm việc thực tập ngay trong quá trình học, tiếp cận công nghệ và dây chuyền sản xuất tiên tiến.",
+        imageUrls: [],
+        captions: [],
+        enabled: true,
+      },
+      {
+        id: "dh-qualam",
+        heading: "Trường Đại học Quế Lâm",
+        description:
+          "Cơ sở đào tạo và khuôn viên Trường Đại học Quế Lâm — đối tác tuyển sinh của chương trình.",
+        imageUrls: [],
+        captions: [],
+        enabled: true,
+      },
+    ],
     graduationBadge: "Khóa 2023-2026 Tốt nghiệp",
     graduationHeading:
       "Lễ tốt nghiệp chính quy tại Trường Đại học Công nghệ Điện tử Quế Lâm",
@@ -682,6 +732,8 @@ export const DEFAULT_CONFIG: SiteConfig = {
       { label: "Đăng ký tư vấn", href: "#dang-ky-cuoi" },
       { label: "Câu hỏi thường gặp", href: "#faq" },
     ],
+    sponsorText:
+      "Đơn vị bảo trợ chuyên môn & tuyển sinh: Trung tâm Hướng nghiệp & Phát triển Sự nghiệp Quốc tế. Chương trình liên kết đào tạo với các trường Cao đẳng nghề và doanh nghiệp tại Trung Quốc.",
   },
   form: {
     headline: "Đăng ký nhận tư vấn miễn phí",
