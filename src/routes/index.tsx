@@ -242,18 +242,18 @@ function Landing() {
     img: content.galleryImageUrls[index] || slide.img,
     caption: content.galleryCaptions[index] || slide.caption,
   }));
-  const sectionOrderMap = new Map(
-    content.sectionsArray.map((item) => [item.id, item.order]),
+  const sectionIndexMap = new Map(
+    content.sectionsArray.map((item, i) => [item.id, i]),
   );
   const extraGallerySliders = content.gallerySliders
     .filter((slider) => slider.enabled)
     .map((slider, idx) => {
       const anchorId = slider.insertAfter || "gallery";
-      const anchorOrder =
-        sectionOrderMap.get(anchorId) ?? sectionOrderMap.get("gallery") ?? 6;
+      const anchorIdx =
+        sectionIndexMap.get(anchorId) ?? sectionIndexMap.get("gallery") ?? 6;
       return {
         ...slider,
-        order: anchorOrder + 1 + 0.1 * (idx + 1),
+        order: anchorIdx + 1 + 0.1 * (idx + 1),
         slides: slider.imageUrls
           .map((img, i) => ({ img, caption: slider.captions[i] || "" }))
           .filter((s) => s.img),

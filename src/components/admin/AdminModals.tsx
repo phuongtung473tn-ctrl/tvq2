@@ -2511,6 +2511,7 @@ function LandingEditorModal({ onClose }: ModalProps) {
   const heroSliderInputRef = useRef<HTMLInputElement>(null);
   const galleryInputRef = useRef<HTMLInputElement>(null);
   const graduationInputRef = useRef<HTMLInputElement>(null);
+  const expertInputRef = useRef<HTMLInputElement>(null);
   const [logoError, setLogoError] = useState("");
   const [heroMediaError, setHeroMediaError] = useState("");
   const [graduationError, setGraduationError] = useState("");
@@ -2829,6 +2830,38 @@ function LandingEditorModal({ onClose }: ModalProps) {
     update((draft) => {
       draft.landing.graduationImageUrls =
         draft.landing.graduationImageUrls.filter((_, i) => i !== index);
+    });
+  }
+  function uploadExpertImages(files: FileList) {
+    const selected = Array.from(files).filter(
+      (file) =>
+        /^image\/(png|jpeg|webp)$/.test(file.type) &&
+        file.size <= 2 * 1024 * 1024,
+    );
+    if (selected.length === 0) return;
+    Promise.all(selected.map((file) => readImageDataUrl(file))).then(
+      (images) => {
+        update((draft) => {
+          draft.landing.expertImageUrls = [
+            ...draft.landing.expertImageUrls,
+            ...images,
+          ];
+        });
+      },
+    );
+  }
+  function removeExpertImage(index: number) {
+    update((draft) => {
+      draft.landing.expertImageUrls =
+        draft.landing.expertImageUrls.filter((_, i) => i !== index);
+    });
+  }
+  function removeGalleryImage(index: number) {
+    update((draft) => {
+      draft.landing.galleryImageUrls =
+        draft.landing.galleryImageUrls.filter((_, i) => i !== index);
+      draft.landing.galleryCaptions =
+        draft.landing.galleryCaptions.filter((_, i) => i !== index);
     });
   }
   function updateSections(nextSections: typeof content.sectionsArray) {
@@ -3655,6 +3688,30 @@ function LandingEditorModal({ onClose }: ModalProps) {
           onChange={(e) => updateJson("galleryImageUrls", e.target.value)}
         />
       </Field>
+      {content.galleryImageUrls.length > 0 && (
+        <div className="mb-3 grid grid-cols-4 gap-1.5 sm:grid-cols-6">
+          {content.galleryImageUrls.map((src, i) => (
+            <div
+              key={`${src}-${i}`}
+              className="group relative aspect-square overflow-hidden rounded border border-neutral-200 dark:border-white/10"
+            >
+              <img
+                src={src}
+                alt={`Gallery ${i + 1}`}
+                className="h-full w-full object-cover"
+              />
+              <button
+                type="button"
+                onClick={() => removeGalleryImage(i)}
+                aria-label="Xóa ảnh"
+                className="absolute right-0.5 top-0.5 rounded-full bg-black/70 px-1 py-0.5 text-[9px] font-bold text-white opacity-0 transition group-hover:opacity-100"
+              >
+                ✕
+              </button>
+            </div>
+          ))}
+        </div>
+      )}
       <div className="mb-3 rounded-xl border border-neutral-200 p-3 dark:border-white/10">
         <p className="text-xs font-bold">Thêm nhiều ảnh vào slider</p>
         <p className="mt-1 text-[11px] text-neutral-400">
@@ -3989,18 +4046,141 @@ function LandingEditorModal({ onClose }: ModalProps) {
           </div>
         )}
       </div>
-      <Field label="URL ảnh chuyên gia (JSON array)">
-        <TextArea
-          value={JSON.stringify(content.expertImageUrls, null, 2)}
-          onChange={(e) => updateJson("expertImageUrls", e.target.value)}
+      <div className="mb-3 rounded-xl border border-neutral-200 p-3 dark:border-white/10">
+        <p className="text-xs font-bold">Ảnh chuyên gia / đội tư vấn</p>
+        <p className="mt-1 text-[11px] text-neutral-400">
+          Tải lên ảnh chuyên gia (PNG/JPG/WebP, tối đa 2MB). Thứ tự ảnh khớp với
+          danh sách chuyên gia bên dưới.
+        </p>
+        <input
+          ref={expertInputRef}
+          type="file"
+          multiple
+          accept="image/png,image/jpeg,image/webp"
+          className="hidden"
+          onChange={(event) => {
+            if (event.target.files) uploadExpertImages(event.target.files);
+            event.target.value = "";
+          }}
         />
-      </Field>
-      <Field label="Chuyên gia (JSON array gồm name, role, bio, experience)">
-        <TextArea
-          value={JSON.stringify(content.experts, null, 2)}
-          onChange={(e) => updateJson("experts", e.target.value)}
-        />
-      </Field>
+        <button
+          type="button"
+          onClick={() => expertInputRef.current?.click()}
+          className="mt-3 rounded-lg bg-neutral-900 px-3 py-2 text-xs font-bold text-white"
+        >
+          Tải ảnh chuyên gia ({content.expertImageUrls.length} ảnh)
+        </button>
+        {content.expertImageUrls.length > 0 && (
+          <div className="mt-2 grid grid-cols-4 gap-1.5 sm:grid-cols-6">
+            {content.expertImageUrls.map((src, i) => (
+              <div
+                key={`${src}-${i}`}
+                className="group relative aspect-square overflow-hidden rounded border border-neutral-200 dark:border-white/10"
+              >
+                <img
+                  src={src}
+                  alt={`Chuyên gia ${i + 1}`}
+                  className="h-full w-full object-cover"
+                />
+                <button
+                  type="button"
+                  onClick={() => removeExpertImage(i)}
+                  aria-label="Xóa ảnh"
+                  className="absolute right-0.5 top-0.5 rounded-full bg-black/70 px-1 py-0.5 text-[9px] font-bold text-white opacity-0 transition group-hover:opacity-100"
+                >
+                  ✕
+                </button>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+      <div className="mb-3 rounded-xl border border-neutral-200 p-3 dark:border-white/10">
+        <p className="text-xs font-bold">Danh sách chuyên gia</p>
+        <p className="mt-1 text-[11px] text-neutral-400">
+          Chỉnh sửa tên, vai trò, tiểu sử và kinh nghiệm từng chuyên gia.
+        </p>
+        {content.experts.map((expert, ei) => (
+          <div
+            key={ei}
+            className="mt-3 rounded-lg border border-neutral-200 p-3 dark:border-white/10"
+          >
+            <div className="mb-2 flex items-center justify-between">
+              <span className="text-xs font-bold">Chuyên gia {ei + 1}</span>
+              <button
+                type="button"
+                onClick={() =>
+                  update((d) => {
+                    d.landing.experts.splice(ei, 1);
+                    if (ei < d.landing.expertImageUrls.length)
+                      d.landing.expertImageUrls.splice(ei, 1);
+                  })
+                }
+                className="rounded-md p-1 text-red-500 hover:bg-red-50"
+                aria-label="Xóa chuyên gia"
+              >
+                <Trash2 className="h-3.5 w-3.5" />
+              </button>
+            </div>
+            <Field label="Tên">
+              <TextInput
+                value={expert.name}
+                onChange={(e) =>
+                  update((d) => {
+                    d.landing.experts[ei]!.name = e.target.value;
+                  })
+                }
+              />
+            </Field>
+            <Field label="Vai trò / Chức danh">
+              <TextInput
+                value={expert.role}
+                onChange={(e) =>
+                  update((d) => {
+                    d.landing.experts[ei]!.role = e.target.value;
+                  })
+                }
+              />
+            </Field>
+            <Field label="Tiểu sử">
+              <TextArea
+                value={expert.bio}
+                onChange={(e) =>
+                  update((d) => {
+                    d.landing.experts[ei]!.bio = e.target.value;
+                  })
+                }
+              />
+            </Field>
+            <Field label="Kinh nghiệm">
+              <TextInput
+                value={expert.experience}
+                onChange={(e) =>
+                  update((d) => {
+                    d.landing.experts[ei]!.experience = e.target.value;
+                  })
+                }
+              />
+            </Field>
+          </div>
+        ))}
+        <button
+          type="button"
+          onClick={() =>
+            update((d) => {
+              d.landing.experts.push({
+                name: "Chuyên gia mới",
+                role: "Cố vấn tuyển sinh",
+                bio: "Giới thiệu kinh nghiệm và chuyên môn.",
+                experience: "10+ năm",
+              });
+            })
+          }
+          className="mt-2 flex w-full items-center justify-center gap-1.5 rounded-lg border border-dashed border-neutral-300 py-2 text-xs font-semibold text-neutral-600"
+        >
+          <Plus className="h-3.5 w-3.5" /> Thêm chuyên gia
+        </button>
+      </div>
       <Field label="Stats (JSON array gồm value, label)">
         <TextArea
           value={JSON.stringify(content.stats, null, 2)}
